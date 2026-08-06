@@ -53,21 +53,30 @@ interface SweepButtonProps {
   /** Plain text — it is rendered twice, once per layer. */
   label: string;
   href?: string;
+  /** Leaves the site: renders a plain anchor with target="_blank". */
+  external?: boolean;
   onClick?: () => void;
   color?: SweepColor;
   variant?: SweepVariant;
   type?: "button" | "submit";
   className?: string;
+  style?: React.CSSProperties;
+  /** Padding on the label layers. Override with em units to scale with the
+      font size — the slide canvas does, so buttons stay proportional. */
+  contentClassName?: string;
 }
 
 export function SweepButton({
   label,
   href,
+  external = false,
   onClick,
   color = "secondary",
   variant = "bordered",
   type = "button",
   className,
+  style,
+  contentClassName = "px-10 py-3",
 }: SweepButtonProps) {
   const palette = COLORS[color];
   const motion = MOTION[variant];
@@ -76,7 +85,8 @@ export function SweepButton({
     <>
       <span
         className={cn(
-          "block px-10 py-3 transition-transform duration-200",
+          "block transition-transform duration-200",
+          contentClassName,
           palette.text,
           motion.label,
         )}
@@ -89,7 +99,8 @@ export function SweepButton({
       <span
         aria-hidden
         className={cn(
-          "absolute inset-0 flex items-center justify-center px-10 text-white transition-[clip-path] duration-300 ease-out",
+          "absolute inset-0 flex items-center justify-center text-white transition-[clip-path] duration-300 ease-out",
+          contentClassName,
           palette.fill,
           motion.panel,
         )}
@@ -105,18 +116,35 @@ export function SweepButton({
     className,
   );
 
+  if (href && external) {
+    // next/link would prefetch and client-navigate an off-site URL, so an
+    // outbound CTA gets a plain anchor.
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={onClick}
+        style={style}
+        className={shared}
+      >
+        {content}
+      </a>
+    );
+  }
+
   if (href) {
     // onClick still fires here — callers use it to close a dialog or sheet
     // as they navigate.
     return (
-      <Link href={href} onClick={onClick} className={shared}>
+      <Link href={href} onClick={onClick} style={style} className={shared}>
         {content}
       </Link>
     );
   }
 
   return (
-    <button type={type} onClick={onClick} className={shared}>
+    <button type={type} onClick={onClick} style={style} className={shared}>
       {content}
     </button>
   );

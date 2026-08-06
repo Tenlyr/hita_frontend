@@ -21,6 +21,7 @@ export const APP_ROUTES = {
     PRODUCTS: "/dashboard/products",
     ADD_PRODUCT: "/dashboard/products/new",
     CATALOG_UPLOAD: "/dashboard/catalog-upload",
+    CAROUSEL: "/dashboard/carousel",
     INVENTORY: "/dashboard/inventory",
     ORDERS: "/dashboard/orders",
   },

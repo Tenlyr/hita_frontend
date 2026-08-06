@@ -2,6 +2,7 @@
 
 import {
   ChevronRight,
+  GalleryHorizontalEnd,
   House,
   LogOut,
   Package,
@@ -41,6 +42,11 @@ const NAV_ITEMS = [
     label: "Catalog Upload",
     href: APP_ROUTES.APP.CATALOG_UPLOAD,
     icon: Upload,
+  },
+  {
+    label: "Carousel",
+    href: APP_ROUTES.APP.CAROUSEL,
+    icon: GalleryHorizontalEnd,
   },
   { label: "Inventory", href: APP_ROUTES.APP.INVENTORY, icon: Package },
   { label: "Orders", href: APP_ROUTES.APP.ORDERS, icon: Truck },

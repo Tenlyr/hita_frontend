@@ -1,24 +1,70 @@
 "use client";
 
-import Image from "next/image";
 import * as React from "react";
 
+import { ResponsiveSlideImage } from "@/components/carousel/slide-image";
+import { ResponsiveSlideCanvas } from "@/components/carousel/slide-canvas";
 import { useFillViewport } from "@/hooks/use-fill-viewport";
+import { carouselService } from "@/services/carousel.service";
 import { cn } from "@/lib/utils";
+import type { CarouselSlide } from "@/types/carousel.types";
 
-interface Slide {
-  src: string;
-  alt: string;
-}
+const AUTOPLAY_MS = 6000;
 
-// One slide for now — add more entries as the artwork lands.
-const SLIDES: Slide[] = [
-  { src: "/images/banner.png", alt: "Handcrafted home decor by Hitadecor" },
-];
+/** Shown until slides exist in the console, so home is never a grey box. */
+const FALLBACK: CarouselSlide = {
+  id: 0,
+  title: "Default banner",
+  image_desktop: "/images/banner.png",
+  image_tablet: "/images/banner.png",
+  image_mobile: "/images/banner.png",
+  has_tablet_image: false,
+  has_mobile_image: false,
+  overlay_opacity: 0,
+  image_focus: {
+    desktop: { x: 50, y: 50 },
+    tablet: { x: 50, y: 50 },
+    mobile: { x: 50, y: 50 },
+  },
+  blocks: [],
+  is_active: true,
+  sort_order: 0,
+};
 
 export function HeroCarousel() {
   const { ref, style } = useFillViewport<HTMLElement>();
+  const [slides, setSlides] = React.useState<CarouselSlide[]>([FALLBACK]);
   const [index, setIndex] = React.useState(0);
+
+  React.useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      try {
+        const result = await carouselService.listPublic();
+        if (!cancelled && result.results.length > 0) {
+          setSlides(result.results);
+          setIndex(0);
+        }
+      } catch {
+        // Keep the fallback banner rather than an empty hero.
+      }
+    }
+
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  React.useEffect(() => {
+    if (slides.length < 2) return;
+    const timer = window.setInterval(
+      () => setIndex((current) => (current + 1) % slides.length),
+      AUTOPLAY_MS,
+    );
+    return () => window.clearInterval(timer);
+  }, [slides.length]);
 
   return (
     <section
@@ -30,9 +76,9 @@ export function HeroCarousel() {
       // the height is known.
       className="relative min-h-72 w-full overflow-hidden bg-muted"
     >
-      {SLIDES.map((slide, position) => (
+      {slides.map((slide, position) => (
         <div
-          key={slide.src}
+          key={slide.id}
           aria-hidden={position !== index}
           className={cn(
             "absolute inset-0 transition-opacity duration-500",
@@ -41,24 +87,28 @@ export function HeroCarousel() {
               : "pointer-events-none opacity-0",
           )}
         >
-          <Image
-            src={slide.src}
-            alt={slide.alt}
-            fill
-            // The hero is the largest paint above the fold, so it loads eagerly.
+          <ResponsiveSlideImage
+            mobile={slide.image_mobile}
+            tablet={slide.image_tablet}
+            desktop={slide.image_desktop}
+            focus={slide.image_focus}
+            alt={slide.title}
+            // The hero is the largest paint above the fold.
             priority={position === 0}
-            sizes="100vw"
-            className="object-cover"
+          />
+          <ResponsiveSlideCanvas
+            blocks={slide.blocks}
+            overlayOpacity={slide.overlay_opacity}
           />
         </div>
       ))}
 
       {/* A single slide has nothing to indicate. */}
-      {SLIDES.length > 1 ? (
+      {slides.length > 1 ? (
         <div className="absolute top-1/2 right-4 z-10 flex -translate-y-1/2 flex-col gap-3 sm:right-6">
-          {SLIDES.map((slide, dot) => (
+          {slides.map((slide, dot) => (
             <button
-              key={slide.src}
+              key={slide.id}
               type="button"
               onClick={() => setIndex(dot)}
               aria-label={`Go to slide ${dot + 1}`}
