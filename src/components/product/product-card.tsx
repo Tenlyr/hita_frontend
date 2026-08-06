@@ -9,7 +9,7 @@ import * as React from "react";
 import { StarRating } from "@/components/product/star-rating";
 import { LineUnderline } from "@/components/ui/line-underline";
 import { cn } from "@/lib/utils";
-import { useAuthDialogStore } from "@/store/auth-dialog.store";
+import { useWishlist } from "@/hooks/use-wishlist";
 
 /** Cheapest variant price — the "from" price shoppers expect to see. */
 function lowestPrice(product: Product): string | null {
@@ -44,22 +44,18 @@ export function ProductCard({
   const image = product.images[0]?.product_image;
   const price = lowestPrice(product);
 
-  // Uncontrolled until a parent owns wishlist state, so the heart still
-  // responds before that exists.
-  const [selfWishlisted, setSelfWishlisted] = React.useState(false);
-  const wishlisted = isWishlisted ?? selfWishlisted;
-  const openAuthDialog = useAuthDialogStore((state) => state.open);
+  const { isWishlisted: isSaved, toggle } = useWishlist();
+
+  // `isWishlisted` lets a parent drive the heart; otherwise the shared
+  // wishlist store does, so every heart for a product stays in step.
+  const wishlisted = isWishlisted ?? isSaved(product.id);
 
   function toggleWishlist() {
-    // Wishlisting needs an account: prompt for sign-in unless the parent has
-    // taken over the behaviour.
-    if (!onWishlist) {
-      openAuthDialog();
+    if (onWishlist) {
+      onWishlist(product, !wishlisted);
       return;
     }
-    const next = !wishlisted;
-    if (isWishlisted === undefined) setSelfWishlisted(next);
-    onWishlist(product, next);
+    void toggle(product.id, product.product_name);
   }
 
   return (

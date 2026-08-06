@@ -81,6 +81,7 @@ export default function ProductDetailPage() {
                 <ProductGallery
                   images={product.images}
                   alt={product.product_name ?? "Product"}
+                  productId={product.id}
                 />
               </div>
               <div className={REVEAL_ITEM}>

@@ -5,6 +5,7 @@ import * as React from "react";
 import { getApiErrorMessage } from "@/lib/api-error";
 import { setCustomerSession } from "@/lib/auth";
 import { authService } from "@/services/auth.service";
+import { useWishlistStore } from "@/store/wishlist.store";
 
 type Step = "phone" | "otp";
 
@@ -39,6 +40,9 @@ export function useCustomerAuth() {
       try {
         const tokens = await authService.verifyOtp(phoneNumber, otp);
         setCustomerSession(tokens);
+        // The store was already marked loaded while signed out, so pull the
+        // saved products in or every heart stays empty until a refresh.
+        void useWishlistStore.getState().load();
         return true;
       } catch (err) {
         setError(getApiErrorMessage(err, "Could not verify the code."));

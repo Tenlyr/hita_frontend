@@ -6,19 +6,26 @@ import Image from "next/image";
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
-import { useAuthDialogStore } from "@/store/auth-dialog.store";
+import { useWishlist } from "@/hooks/use-wishlist";
 
 const AUTO_SWITCH_MS = 4000;
 
 interface ProductGalleryProps {
   images: ProductImage[];
   alt: string;
+  /** Wishlisting is per product, so the gallery needs the id too. */
+  productId: number;
 }
 
-export function ProductGallery({ images, alt }: ProductGalleryProps) {
+export function ProductGallery({
+  images,
+  alt,
+  productId,
+}: ProductGalleryProps) {
   const [index, setIndex] = React.useState(0);
   const [paused, setPaused] = React.useState(false);
-  const openAuthDialog = useAuthDialogStore((state) => state.open);
+  const { isWishlisted, toggle } = useWishlist();
+  const saved = isWishlisted(productId);
 
   React.useEffect(() => {
     if (paused || images.length < 2) return;
@@ -51,11 +58,19 @@ export function ProductGallery({ images, alt }: ProductGalleryProps) {
       <div className="relative aspect-square w-full overflow-hidden bg-muted lg:w-[88%]">
         <button
           type="button"
-          onClick={openAuthDialog}
-          aria-label={`Add ${alt} to wishlist`}
+          onClick={() => void toggle(productId, alt)}
+          aria-label={
+            saved ? `Remove ${alt} from wishlist` : `Add ${alt} to wishlist`
+          }
+          aria-pressed={saved}
           className="absolute top-4 left-4 z-10 cursor-pointer rounded-full bg-background p-3 shadow-md transition-transform hover:scale-110"
         >
-          <Heart className="size-5 text-secondary" />
+          <Heart
+            className={cn(
+              "size-5 transition-colors",
+              saved ? "fill-destructive text-destructive" : "text-secondary",
+            )}
+          />
         </button>
 
         {images.map((image, position) => (
