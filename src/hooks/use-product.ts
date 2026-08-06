@@ -1,10 +1,10 @@
 "use client";
 
+import type { Product } from "@/types/product.types";
 import * as React from "react";
 
 import { getApiErrorMessage } from "@/lib/api-error";
 import { productService } from "@/services/product.service";
-import type { Product } from "@/types/product.types";
 
 interface ProductState {
   loadedId: number | null;

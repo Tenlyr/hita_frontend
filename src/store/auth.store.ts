@@ -1,3 +1,5 @@
+import type { AuthUser } from "@/types/session.types";
+import type { AdminLoginPayload } from "@/types/admin.auth.types";
 import { create } from "zustand";
 
 import { getApiErrorMessage } from "@/lib/api-error";
@@ -8,7 +10,6 @@ import {
   setAdminSession,
 } from "@/lib/auth";
 import { authService } from "@/services/auth.service";
-import type { AdminLoginPayload, AuthUser } from "@/types/auth.types";
 
 interface AuthState {
   user: AuthUser | null;
@@ -39,7 +40,10 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({
         user: null,
         isLoading: false,
-        error: getApiErrorMessage(error, "Unable to sign in. Please try again."),
+        error: getApiErrorMessage(
+          error,
+          "Unable to sign in. Please try again.",
+        ),
       });
       return false;
     }

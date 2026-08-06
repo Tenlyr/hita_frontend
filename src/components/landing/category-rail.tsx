@@ -1,11 +1,13 @@
 "use client";
 
+import type { Category } from "@/types/customer.product.types";
 import { ImageOff } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import * as React from "react";
 
-import { catalogService } from "@/services/catalog.service";
-import type { CatalogCategory } from "@/types/catalog.types";
+import { APP_ROUTES } from "@/constants/routes";
+import { productService } from "@/services/product.service";
 
 function CategorySkeleton() {
   return (
@@ -17,7 +19,7 @@ function CategorySkeleton() {
 }
 
 export function CategoryRail() {
-  const [categories, setCategories] = React.useState<CatalogCategory[]>([]);
+  const [categories, setCategories] = React.useState<Category[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
@@ -25,7 +27,7 @@ export function CategoryRail() {
 
     async function load() {
       try {
-        const result = await catalogService.categories();
+        const result = await productService.categories();
         if (!cancelled) setCategories(result);
       } catch {
         // Storefront decoration — a failed fetch just hides the rail.
@@ -55,42 +57,42 @@ export function CategoryRail() {
             reachable once it overflows — justify-center would clip it. */}
         <div className="mx-auto flex w-max gap-3 sm:gap-4">
           {isLoading
-          ? Array.from({ length: 8 }).map((_, index) => (
-              <CategorySkeleton key={index} />
-            ))
-          : categories.map((category) => (
-              <a
-                key={category.name}
-                href={`#category-${encodeURIComponent(category.name)}`}
-                className="group/tile flex w-16 shrink-0 flex-col items-center gap-1.5 text-center sm:w-20"
-              >
-                <span className="relative size-14 overflow-hidden rounded-full border border-border bg-muted transition-transform duration-200 hover:scale-105 sm:size-16">
-                  {category.image ? (
-                    <Image
-                      src={category.image}
-                      alt=""
-                      fill
-                      unoptimized
-                      sizes="96px"
-                      className="object-cover"
-                    />
-                  ) : (
-                    <span className="flex h-full items-center justify-center text-muted-foreground">
-                      <ImageOff className="size-6" />
-                    </span>
-                  )}
-                </span>
-                <span className="text-xs leading-tight font-medium text-secondary">
-                  {category.name}
-                </span>
+            ? Array.from({ length: 8 }).map((_, index) => (
+                <CategorySkeleton key={index} />
+              ))
+            : categories.map((category) => (
+                <Link
+                  key={category.name}
+                  href={`${APP_ROUTES.SHOP.PRODUCTS}?category=${encodeURIComponent(category.name)}`}
+                  className="group/tile flex w-16 shrink-0 flex-col items-center gap-1.5 text-center sm:w-20"
+                >
+                  <span className="relative size-14 overflow-hidden rounded-full border border-border bg-muted transition-transform duration-200 hover:scale-105 sm:size-16">
+                    {category.image ? (
+                      <Image
+                        src={category.image}
+                        alt=""
+                        fill
+                        unoptimized
+                        sizes="96px"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <span className="flex h-full items-center justify-center text-muted-foreground">
+                        <ImageOff className="size-6" />
+                      </span>
+                    )}
+                  </span>
+                  <span className="text-xs leading-tight font-medium text-secondary">
+                    {category.name}
+                  </span>
 
-                {/* Underline grows from the centre on hover. mt-auto pins it
+                  {/* Underline grows from the centre on hover. mt-auto pins it
                     to the bottom so tiles with two-line labels still align. */}
-                <span
-                  aria-hidden
-                  className="mt-auto h-0.5 w-full scale-x-0 bg-sidebar transition-transform duration-200 ease-out group-hover/tile:scale-x-100"
-                />
-              </a>
+                  <span
+                    aria-hidden
+                    className="mt-auto h-0.5 w-full scale-x-0 bg-sidebar transition-transform duration-200 ease-out group-hover/tile:scale-x-100"
+                  />
+                </Link>
               ))}
         </div>
       </div>

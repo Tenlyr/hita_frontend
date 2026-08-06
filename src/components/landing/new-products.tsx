@@ -1,5 +1,6 @@
 "use client";
 
+import type { Product } from "@/types/product.types";
 import Image from "next/image";
 import * as React from "react";
 
@@ -7,8 +8,7 @@ import { ProductCard } from "@/components/product/product-card";
 import { SweepButton } from "@/components/ui/sweep-button";
 import { APP_ROUTES } from "@/constants/routes";
 import { REVEAL_ITEM, useGsapReveal } from "@/hooks/use-gsap-reveal";
-import { catalogService } from "@/services/catalog.service";
-import type { Product } from "@/types/product.types";
+import { productService } from "@/services/product.service";
 
 const LIMIT = 8;
 const ALL_PRODUCTS_LABEL = "All Products";
@@ -38,7 +38,7 @@ export function NewProducts() {
 
     async function load() {
       try {
-        const result = await catalogService.products({
+        const result = await productService.browse({
           page_size: LIMIT,
           sort: "latest",
         });

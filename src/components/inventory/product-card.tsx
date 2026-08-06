@@ -1,13 +1,20 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Eye, ImageOff, Pencil, Star } from "lucide-react";
+import type { Product } from "@/types/product.types";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  ImageOff,
+  Pencil,
+  Star,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import * as React from "react";
 
 import { APP_ROUTES } from "@/constants/routes";
 import { cn } from "@/lib/utils";
-import type { Product } from "@/types/product.types";
 
 function formatPrice(value: string | null): string | null {
   if (!value) return null;
@@ -38,12 +45,15 @@ export function ProductCard({ product }: { product: Product }) {
   const hasCarousel = images.length > 1;
 
   // Only ever show an offer that actually exists — no "None% off".
-  const offer = product.variants.find((variant) => variant.offer)?.offer ?? null;
+  const offer =
+    product.variants.find((variant) => variant.offer)?.offer ?? null;
   const price = lowestPrice(product);
   const stock = totalStock(product);
 
   function step(direction: 1 | -1) {
-    setIndex((current) => (current + direction + images.length) % images.length);
+    setIndex(
+      (current) => (current + direction + images.length) % images.length,
+    );
   }
 
   return (
@@ -145,7 +155,9 @@ export function ProductCard({ product }: { product: Product }) {
 
         <p className="line-clamp-2 text-sm text-muted-foreground">
           {product.description ??
-            [product.category, product.sub_category].filter(Boolean).join(" · ")}
+            [product.category, product.sub_category]
+              .filter(Boolean)
+              .join(" · ")}
         </p>
 
         <div className="mt-auto flex items-end justify-between gap-2 pt-3">

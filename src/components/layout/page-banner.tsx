@@ -56,7 +56,10 @@ export function PageBanner({ title, crumbs = [], className }: PageBannerProps) {
                     {crumb.label}
                   </Link>
                 ) : (
-                  <span aria-current="page" className="font-medium text-primary">
+                  <span
+                    aria-current="page"
+                    className="font-medium text-primary"
+                  >
                     {crumb.label}
                   </span>
                 )}

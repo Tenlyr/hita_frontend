@@ -139,7 +139,6 @@ export function InventoryBoard() {
           ) : null}
         </>
       )}
-
     </div>
   );
 }

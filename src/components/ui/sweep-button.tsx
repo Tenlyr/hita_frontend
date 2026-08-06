@@ -8,24 +8,26 @@ import { cn } from "@/lib/utils";
 type SweepColor = "primary" | "secondary" | "sidebar";
 type SweepVariant = "bordered" | "filled";
 
-const COLORS: Record<SweepColor, { border: string; text: string; fill: string }> =
-  {
-    primary: {
-      border: "border-primary",
-      text: "text-primary",
-      fill: "bg-primary",
-    },
-    secondary: {
-      border: "border-secondary",
-      text: "text-secondary",
-      fill: "bg-secondary",
-    },
-    sidebar: {
-      border: "border-sidebar",
-      text: "text-sidebar",
-      fill: "bg-sidebar",
-    },
-  };
+const COLORS: Record<
+  SweepColor,
+  { border: string; text: string; fill: string }
+> = {
+  primary: {
+    border: "border-primary",
+    text: "text-primary",
+    fill: "bg-primary",
+  },
+  secondary: {
+    border: "border-secondary",
+    text: "text-secondary",
+    fill: "bg-secondary",
+  },
+  sidebar: {
+    border: "border-sidebar",
+    text: "text-sidebar",
+    fill: "bg-sidebar",
+  },
+};
 
 /**
  * `bordered` — outlined at rest. On hover the label drops away and the filled

@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  SORT_LABELS,
+  Category,
+  ProductQuery,
+  ProductSort,
+} from "@/types/customer.product.types";
 import * as React from "react";
 
 import {
@@ -11,21 +17,15 @@ import {
 } from "@/components/ui/select";
 import { SweepButton } from "@/components/ui/sweep-button";
 import { cn } from "@/lib/utils";
-import {
-  CATALOG_SORT_LABELS,
-  type CatalogCategory,
-  type CatalogQuery,
-  type CatalogSort,
-} from "@/types/catalog.types";
 
 /** Base UI Select can't hold "" as a value, so All uses a sentinel. */
 const ALL_CATEGORIES = "__all__";
 
-interface CatalogFiltersProps {
-  categories: CatalogCategory[];
+interface ProductFiltersProps {
+  categories: Category[];
   /** Currently applied filters, so the button can tell whether anything moved. */
-  applied: CatalogQuery;
-  onApply: (filters: CatalogQuery) => void;
+  applied: ProductQuery;
+  onApply: (filters: ProductQuery) => void;
 }
 
 const TRIGGER_CLASS = [
@@ -58,16 +58,18 @@ function Field({
   );
 }
 
-export function CatalogFilters({
+export function ProductFilters({
   categories,
   applied,
   onApply,
-}: CatalogFiltersProps) {
+}: ProductFiltersProps) {
   // Draft state: nothing takes effect until Apply Filters is pressed.
   const [category, setCategory] = React.useState(
     applied.category ?? ALL_CATEGORIES,
   );
-  const [sort, setSort] = React.useState<CatalogSort>(applied.sort ?? "popular");
+  const [sort, setSort] = React.useState<ProductSort>(
+    applied.sort ?? "popular",
+  );
   const [inStock, setInStock] = React.useState(applied.in_stock ?? false);
 
   const isDirty =
@@ -122,9 +124,9 @@ export function CatalogFilters({
 
       <Field label="Sort By">
         <Select
-          items={CATALOG_SORT_LABELS}
+          items={SORT_LABELS}
           value={sort}
-          onValueChange={(value) => setSort(value as CatalogSort)}
+          onValueChange={(value) => setSort(value as ProductSort)}
         >
           <SelectTrigger className={TRIGGER_CLASS}>
             <SelectValue />
@@ -136,7 +138,7 @@ export function CatalogFilters({
             align="start"
             alignItemWithTrigger={false}
           >
-            {Object.entries(CATALOG_SORT_LABELS).map(([value, label]) => (
+            {Object.entries(SORT_LABELS).map(([value, label]) => (
               <SelectItem key={value} value={value} className={ITEM_CLASS}>
                 {label}
               </SelectItem>

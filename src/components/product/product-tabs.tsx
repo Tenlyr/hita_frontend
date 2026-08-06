@@ -1,11 +1,11 @@
 "use client";
 
+import type { Product, ProductVariant } from "@/types/product.types";
 import { Check, FileText } from "lucide-react";
 import Image from "next/image";
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
-import type { Product, ProductVariant } from "@/types/product.types";
 
 type Tab = "description" | "shipping";
 
@@ -141,39 +141,41 @@ export function ProductTabs({
           >
             {hasBody ? (
               <div className="space-y-6">
-              {description ? (
-                <p className="leading-relaxed text-secondary/85">{description}</p>
-              ) : null}
-
-              {care ? (
-                <div className="border-l-2 border-primary bg-primary/5 px-5 py-4">
-                  <h3 className="text-sm font-bold tracking-wide text-primary uppercase">
-                    Care instructions
-                  </h3>
-                  <p className="mt-2 leading-relaxed text-secondary/85">
-                    {care}
+                {description ? (
+                  <p className="leading-relaxed text-secondary/85">
+                    {description}
                   </p>
-                </div>
-              ) : null}
+                ) : null}
 
-              {usage.length > 0 ? (
-                <div>
-                  <h3 className="text-sm font-bold tracking-wide text-primary uppercase">
-                    Ideal for
-                  </h3>
-                  <ul className="mt-3 grid gap-2 sm:grid-cols-2">
-                    {usage.map((item) => (
-                      <li
-                        key={item}
-                        className="flex items-start gap-2 text-secondary/85"
-                      >
-                        <Check className="mt-1 size-4 shrink-0 text-primary" />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
+                {care ? (
+                  <div className="border-l-2 border-primary bg-primary/5 px-5 py-4">
+                    <h3 className="text-sm font-bold tracking-wide text-primary uppercase">
+                      Care instructions
+                    </h3>
+                    <p className="mt-2 leading-relaxed text-secondary/85">
+                      {care}
+                    </p>
+                  </div>
+                ) : null}
+
+                {usage.length > 0 ? (
+                  <div>
+                    <h3 className="text-sm font-bold tracking-wide text-primary uppercase">
+                      Ideal for
+                    </h3>
+                    <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+                      {usage.map((item) => (
+                        <li
+                          key={item}
+                          className="flex items-start gap-2 text-secondary/85"
+                        >
+                          <Check className="mt-1 size-4 shrink-0 text-primary" />
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
               </div>
             ) : null}
 
@@ -207,9 +209,7 @@ export function ProductTabs({
                   {madeIn ? (
                     <div className="flex items-center justify-between px-5 py-3">
                       <dt className="text-secondary/70">Origin</dt>
-                      <dd className="font-medium text-secondary">
-                        {madeIn}
-                      </dd>
+                      <dd className="font-medium text-secondary">{madeIn}</dd>
                     </div>
                   ) : null}
                 </dl>

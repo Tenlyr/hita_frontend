@@ -1,4 +1,4 @@
-import type { ProductVariantDraft } from "@/types/product.types";
+import type { ProductVariantDraft } from "@/types/admin.product.types";
 
 export const ADD_PRODUCT_PAGE = {
   title: "Add Product",
@@ -35,9 +35,24 @@ export const VARIANT_FIELDS = [
     placeholder: "10",
   },
   { name: "price", label: "Price (₹)", type: "number", placeholder: "2499.00" },
-  { name: "length_in_cm", label: "Length (cm)", type: "number", placeholder: "20" },
-  { name: "width_in_cm", label: "Width (cm)", type: "number", placeholder: "15" },
-  { name: "height_in_cm", label: "Height (cm)", type: "number", placeholder: "30" },
+  {
+    name: "length_in_cm",
+    label: "Length (cm)",
+    type: "number",
+    placeholder: "20",
+  },
+  {
+    name: "width_in_cm",
+    label: "Width (cm)",
+    type: "number",
+    placeholder: "15",
+  },
+  {
+    name: "height_in_cm",
+    label: "Height (cm)",
+    type: "number",
+    placeholder: "30",
+  },
   {
     name: "diameter_in_cm",
     label: "Diameter (cm)",
@@ -57,7 +72,9 @@ export const VARIANT_FIELDS = [
  * a generated id would differ between the server HTML and the client and
  * break hydration. Rows added later are client-only, so the default is safe.
  */
-export function emptyVariant(key: string = crypto.randomUUID()): ProductVariantDraft {
+export function emptyVariant(
+  key: string = crypto.randomUUID(),
+): ProductVariantDraft {
   return {
     key,
     size: "",

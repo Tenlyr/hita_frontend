@@ -9,7 +9,7 @@ import { ProductPurchasePanel } from "@/components/product/product-purchase-pane
 import { ProductTabs } from "@/components/product/product-tabs";
 import { RelatedProducts } from "@/components/product/related-products";
 import { APP_ROUTES } from "@/constants/routes";
-import { useCatalogProduct } from "@/hooks/use-catalog-product";
+import { useProductDetail } from "@/hooks/use-product-detail";
 import { REVEAL_ITEM, useGsapReveal } from "@/hooks/use-gsap-reveal";
 import { useVariantSelection } from "@/hooks/use-variant-selection";
 
@@ -30,7 +30,7 @@ function DetailSkeleton() {
 export default function ProductDetailPage() {
   const params = useParams<{ id: string }>();
   const id = Number(params.id);
-  const { product, isLoading, error } = useCatalogProduct(
+  const { product, isLoading, error } = useProductDetail(
     Number.isNaN(id) ? null : id,
   );
   const { selected, selectVariant } = useVariantSelection(product);
@@ -76,10 +76,7 @@ export default function ProductDetailPage() {
         ) : product ? (
           <div className="space-y-14">
             {/* Above the fold, so it plays on load rather than on scroll. */}
-            <div
-              ref={heroRef}
-              className="grid gap-10 lg:grid-cols-2 lg:gap-14"
-            >
+            <div ref={heroRef} className="grid gap-10 lg:grid-cols-2 lg:gap-14">
               <div className={REVEAL_ITEM}>
                 <ProductGallery
                   images={product.images}

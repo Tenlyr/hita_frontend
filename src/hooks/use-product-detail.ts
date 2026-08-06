@@ -1,13 +1,13 @@
 "use client";
 
+import type { Product } from "@/types/product.types";
 import * as React from "react";
 
 import { getApiErrorMessage } from "@/lib/api-error";
-import { catalogService } from "@/services/catalog.service";
-import type { Product } from "@/types/product.types";
+import { productService } from "@/services/product.service";
 
 /** Public product detail by id. Pass null to skip fetching. */
-export function useCatalogProduct(id: number | null) {
+export function useProductDetail(id: number | null) {
   const [product, setProduct] = React.useState<Product | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -21,7 +21,7 @@ export function useCatalogProduct(id: number | null) {
       setIsLoading(true);
       setError(null);
       try {
-        const result = await catalogService.product(productId);
+        const result = await productService.detail(productId);
         if (!cancelled) setProduct(result);
       } catch (err) {
         if (!cancelled) {

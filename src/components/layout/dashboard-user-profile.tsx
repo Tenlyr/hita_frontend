@@ -1,8 +1,8 @@
 "use client";
 
+import type { AuthUser } from "@/types/session.types";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useCurrentUser } from "@/hooks/use-current-user";
-import type { AuthUser } from "@/types/auth.types";
 
 function initialsFor(user: AuthUser): string {
   const source = user.name || user.email || user.phone_number;

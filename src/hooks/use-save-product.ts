@@ -1,12 +1,13 @@
 "use client";
 
+import type { Product } from "@/types/product.types";
+import type { ProductDraft } from "@/types/admin.product.types";
 import axios from "axios";
 import * as React from "react";
 
 import { getApiErrorMessage } from "@/lib/api-error";
 import { toProductPayload } from "@/lib/product-payload";
 import { productService } from "@/services/product.service";
-import type { Product, ProductDraft } from "@/types/product.types";
 
 interface SaveProductState {
   isSubmitting: boolean;

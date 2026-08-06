@@ -1,11 +1,11 @@
 "use client";
 
+import type { Product } from "@/types/product.types";
+import type { ProductQuery } from "@/types/customer.product.types";
 import * as React from "react";
 
 import { getApiErrorMessage } from "@/lib/api-error";
-import { catalogService } from "@/services/catalog.service";
-import type { CatalogQuery } from "@/types/catalog.types";
-import type { Product } from "@/types/product.types";
+import { productService } from "@/services/product.service";
 
 const PAGE_SIZE = 12;
 
@@ -15,7 +15,7 @@ const PAGE_SIZE = 12;
  * `filters` is the applied set — changing it resets to page 1 and replaces the
  * list rather than appending.
  */
-export function useCatalogProducts(filters: CatalogQuery) {
+export function useProductListing(filters: ProductQuery) {
   const [products, setProducts] = React.useState<Product[]>([]);
   const [count, setCount] = React.useState(0);
   const [page, setPage] = React.useState(1);
@@ -34,8 +34,8 @@ export function useCatalogProducts(filters: CatalogQuery) {
       setIsLoading(true);
       setError(null);
       try {
-        const result = await catalogService.products({
-          ...(JSON.parse(filterKey) as CatalogQuery),
+        const result = await productService.browse({
+          ...(JSON.parse(filterKey) as ProductQuery),
           page: 1,
           page_size: PAGE_SIZE,
         });
@@ -65,8 +65,8 @@ export function useCatalogProducts(filters: CatalogQuery) {
 
     setIsLoadingMore(true);
     try {
-      const result = await catalogService.products({
-        ...(JSON.parse(filterKey) as CatalogQuery),
+      const result = await productService.browse({
+        ...(JSON.parse(filterKey) as ProductQuery),
         page: page + 1,
         page_size: PAGE_SIZE,
       });

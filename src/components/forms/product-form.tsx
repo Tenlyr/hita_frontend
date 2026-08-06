@@ -1,5 +1,11 @@
 "use client";
 
+import type { Product } from "@/types/product.types";
+import type {
+  ProductDraft,
+  ProductDraftErrors,
+  ProductVariantDraft,
+} from "@/types/admin.product.types";
 import { ImagePlus, Plus, Trash2, X } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -30,12 +36,6 @@ import { useCategoryOptions } from "@/hooks/use-category-options";
 import { useSaveProduct } from "@/hooks/use-save-product";
 import { toProductDraft } from "@/lib/product-payload";
 import { cn } from "@/lib/utils";
-import type {
-  Product,
-  ProductDraft,
-  ProductDraftErrors,
-  ProductVariantDraft,
-} from "@/types/product.types";
 
 interface ImageDraft {
   key: string;
@@ -182,7 +182,9 @@ export function ProductForm({ product }: ProductFormProps) {
 
   /** Removal is only committed on save, so it stays cancellable. */
   function removeExistingImage(id: number) {
-    setExistingImages((previous) => previous.filter((image) => image.id !== id));
+    setExistingImages((previous) =>
+      previous.filter((image) => image.id !== id),
+    );
     setRemovedImageIds((previous) => [...previous, id]);
   }
 
@@ -415,7 +417,9 @@ export function ProductForm({ product }: ProductFormProps) {
           <CardTitle className="text-lg text-secondary">
             {PRODUCT_SECTIONS.media.title}
           </CardTitle>
-          <CardDescription>{PRODUCT_SECTIONS.media.description}</CardDescription>
+          <CardDescription>
+            {PRODUCT_SECTIONS.media.description}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-4">
@@ -533,7 +537,9 @@ export function ProductForm({ product }: ProductFormProps) {
                     <Input
                       id={`${variant.key}-${field.name}`}
                       type={field.type}
-                      inputMode={field.type === "number" ? "decimal" : undefined}
+                      inputMode={
+                        field.type === "number" ? "decimal" : undefined
+                      }
                       value={variant[field.name]}
                       onChange={(event) =>
                         setVariantField(
@@ -596,11 +602,7 @@ export function ProductForm({ product }: ProductFormProps) {
             "relative isolate cursor-pointer overflow-hidden border-sidebar bg-transparent px-10 text-white transition-colors duration-300 hover:bg-transparent hover:text-sidebar before:absolute before:inset-0 before:-z-10 before:bg-sidebar before:transition-transform before:duration-300 before:ease-out hover:before:-translate-x-full",
           )}
         >
-          {isSubmitting
-            ? "Saving…"
-            : isEdit
-              ? "Save Changes"
-              : "Save Product"}
+          {isSubmitting ? "Saving…" : isEdit ? "Save Changes" : "Save Product"}
         </Button>
       </div>
     </form>

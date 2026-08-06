@@ -1,12 +1,12 @@
 "use client";
 
+import type { ProductImage } from "@/types/product.types";
 import { Heart, ImageOff } from "lucide-react";
 import Image from "next/image";
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
 import { useAuthDialogStore } from "@/store/auth-dialog.store";
-import type { ProductImage } from "@/types/product.types";
 
 const AUTO_SWITCH_MS = 4000;
 

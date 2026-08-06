@@ -1,14 +1,20 @@
 "use client";
 
+import type {
+  Category,
+  ProductQuery,
+} from "@/types/customer.product.types";
 import { Loader2, PackageSearch } from "lucide-react";
+import { useRouter } from "next/navigation";
 import * as React from "react";
 
-import { CatalogFilters } from "@/components/product/catalog-filters";
+import { APP_ROUTES } from "@/constants/routes";
+
+import { ProductFilters } from "@/components/product/product-filters";
 import { ProductCard } from "@/components/product/product-card";
-import { useCatalogProducts } from "@/hooks/use-catalog-products";
+import { useProductListing } from "@/hooks/use-product-listing";
 import { REVEAL_ITEM, useGsapReveal } from "@/hooks/use-gsap-reveal";
-import { catalogService } from "@/services/catalog.service";
-import type { CatalogCategory, CatalogQuery } from "@/types/catalog.types";
+import { productService } from "@/services/product.service";
 
 function CardSkeleton() {
   return (
@@ -22,11 +28,37 @@ function CardSkeleton() {
   );
 }
 
-export function ProductGrid() {
-  const [categories, setCategories] = React.useState<CatalogCategory[]>([]);
-  const [filters, setFilters] = React.useState<CatalogQuery>({
-    sort: "popular",
-  });
+export function ProductGrid({
+  initialFilters,
+}: {
+  /** Seeded from the URL, so the banner and the grid can't disagree. */
+  initialFilters: ProductQuery;
+}) {
+  const router = useRouter();
+  const [categories, setCategories] = React.useState<Category[]>([]);
+  const [filters, setFilters] = React.useState<ProductQuery>(initialFilters);
+
+  /**
+   * Filters live in the URL: the banner is rendered on the server from the
+   * same params, so changing them locally alone would leave it stale — and it
+   * makes a filtered view shareable.
+   */
+  function applyFilters(next: ProductQuery) {
+    setFilters(next);
+
+    const params = new URLSearchParams();
+    if (next.category) params.set("category", next.category);
+    if (next.sort && next.sort !== "popular") params.set("sort", next.sort);
+    if (next.in_stock) params.set("in_stock", "true");
+
+    const query = params.toString();
+    router.replace(
+      query ? `${APP_ROUTES.SHOP.PRODUCTS}?${query}` : APP_ROUTES.SHOP.PRODUCTS,
+      {
+        scroll: false,
+      },
+    );
+  }
 
   const {
     products,
@@ -37,7 +69,7 @@ export function ProductGrid() {
     error,
     loadMore,
     pageSize,
-  } = useCatalogProducts(filters);
+  } = useProductListing(filters);
 
   const sentinelRef = React.useRef<HTMLDivElement>(null);
 
@@ -53,7 +85,7 @@ export function ProductGrid() {
 
     async function loadCategories() {
       try {
-        const result = await catalogService.categories();
+        const result = await productService.categories();
         if (!cancelled) setCategories(result);
       } catch {
         // Filters degrade gracefully to "All Categories".
@@ -84,10 +116,10 @@ export function ProductGrid() {
 
   return (
     <section className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
-      <CatalogFilters
+      <ProductFilters
         categories={categories}
         applied={filters}
-        onApply={setFilters}
+        onApply={applyFilters}
       />
 
       {error ? (

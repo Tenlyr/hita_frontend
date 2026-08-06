@@ -22,7 +22,10 @@ export function BreadcrumbBar({ crumbs, className }: BreadcrumbBarProps) {
     >
       <ol className="mx-auto flex w-full max-w-7xl flex-wrap items-center gap-2 px-4 text-base font-medium sm:px-6 sm:text-md">
         {crumbs.map((crumb, index) => (
-          <li key={`${crumb.label}-${index}`} className="flex items-center gap-2">
+          <li
+            key={`${crumb.label}-${index}`}
+            className="flex items-center gap-2"
+          >
             {index > 0 ? (
               <span aria-hidden className="text-secondary/40">
                 /

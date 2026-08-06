@@ -1,10 +1,10 @@
 "use client";
 
+import type { ProductListResult } from "@/types/admin.product.types";
 import * as React from "react";
 
 import { getApiErrorMessage } from "@/lib/api-error";
 import { productService } from "@/services/product.service";
-import type { ProductListResult } from "@/types/product.types";
 
 const PAGE_SIZE = 12;
 const SEARCH_DEBOUNCE_MS = 350;

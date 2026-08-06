@@ -3,13 +3,14 @@
 import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import * as React from "react";
+import { toast } from "sonner";
 
 import { OtpInput } from "@/components/auth/otp-input";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SweepButton } from "@/components/ui/sweep-button";
-import { APP_CONFIG } from "@/constants/config";
+import { useCustomerAuth } from "@/hooks/use-customer-auth";
 import { josefinSans } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 import { useAuthDialogStore } from "@/store/auth-dialog.store";
@@ -17,17 +18,29 @@ import { useAuthDialogStore } from "@/store/auth-dialog.store";
 const OTP_LENGTH = 6;
 const PHONE_LENGTH = 10;
 
-type Step = "phone" | "otp";
-
 export function CustomerAuthDialog() {
   const isOpen = useAuthDialogStore((state) => state.isOpen);
   const setOpen = useAuthDialogStore((state) => state.setOpen);
 
-  const [step, setStep] = React.useState<Step>("phone");
+  const {
+    step,
+    phoneNumber,
+    isSubmitting,
+    error,
+    clearError,
+    requestOtp,
+    verifyOtp,
+    backToPhone,
+    reset: resetAuth,
+  } = useCustomerAuth();
+
   const [phone, setPhone] = React.useState("");
   const [otp, setOtp] = React.useState("");
-  const [error, setError] = React.useState<string | null>(null);
+  const [localError, setLocalError] = React.useState<string | null>(null);
   const [secondsLeft, setSecondsLeft] = React.useState(0);
+
+  // Client-side validation message takes priority; otherwise show the API's.
+  const shownError = localError ?? error;
 
   // Resend countdown, only while the OTP step is on screen.
   React.useEffect(() => {
@@ -37,11 +50,11 @@ export function CustomerAuthDialog() {
   }, [step, secondsLeft]);
 
   function reset() {
-    setStep("phone");
     setPhone("");
     setOtp("");
-    setError(null);
+    setLocalError(null);
     setSecondsLeft(0);
+    resetAuth();
   }
 
   function handleOpenChange(next: boolean) {
@@ -50,25 +63,37 @@ export function CustomerAuthDialog() {
     if (!next) setTimeout(reset, 200);
   }
 
-  function handleSendOtp(event: React.FormEvent) {
+  async function handleSendOtp(event: React.FormEvent) {
     event.preventDefault();
     if (phone.length !== PHONE_LENGTH) {
-      setError("Enter a valid 10-digit mobile number.");
+      setLocalError("Enter a valid 10-digit mobile number.");
       return;
     }
-    setError(null);
-    setStep("otp");
-    setSecondsLeft(APP_CONFIG.otpExpirySeconds);
-    // TODO: POST /auth/otp/request once the endpoint exists.
+    setLocalError(null);
+
+    const result = await requestOtp(phone);
+    if (result) setSecondsLeft(result.expires_in);
   }
 
-  function handleVerify(code: string = otp) {
+  async function handleResend() {
+    setOtp("");
+    setLocalError(null);
+    const result = await requestOtp(phone);
+    if (result) setSecondsLeft(result.expires_in);
+  }
+
+  async function handleVerify(code: string = otp) {
     if (code.length !== OTP_LENGTH) {
-      setError("Enter the 6-digit code.");
+      setLocalError("Enter the 6-digit code.");
       return;
     }
-    setError(null);
-    // TODO: POST /auth/otp/verify once the endpoint exists.
+    setLocalError(null);
+
+    if (await verifyOtp(code)) {
+      toast.success("You're signed in.");
+      setOpen(false);
+      setTimeout(reset, 200);
+    }
   }
 
   return (
@@ -96,7 +121,7 @@ export function CustomerAuthDialog() {
           <p className="text-sm text-muted-foreground">
             {step === "phone"
               ? "Save favourites and track orders with your mobile number."
-              : `We sent a ${OTP_LENGTH}-digit code to +91 ${phone}.`}
+              : `We sent a ${OTP_LENGTH}-digit code to ${phoneNumber || phone}.`}
           </p>
         </div>
 
@@ -125,21 +150,23 @@ export function CustomerAuthDialog() {
                           .replace(/\D/g, "")
                           .slice(0, PHONE_LENGTH),
                       );
-                      setError(null);
+                      setLocalError(null);
+                      clearError();
                     }}
-                    aria-invalid={Boolean(error)}
+                    disabled={isSubmitting}
+                    aria-invalid={Boolean(shownError)}
                     className="h-12 rounded-none text-base"
                   />
                 </div>
-                {error ? (
+                {shownError ? (
                   <p role="alert" className="text-sm text-destructive">
-                    {error}
+                    {shownError}
                   </p>
                 ) : null}
               </div>
 
               <SweepButton
-                label="Send OTP"
+                label={isSubmitting ? "Sending…" : "Send OTP"}
                 type="submit"
                 color="sidebar"
                 variant="filled"
@@ -156,20 +183,22 @@ export function CustomerAuthDialog() {
                 value={otp}
                 onChange={(next) => {
                   setOtp(next);
-                  setError(null);
+                  setLocalError(null);
+                  clearError();
                 }}
+                disabled={isSubmitting}
                 onComplete={handleVerify}
-                hasError={Boolean(error)}
+                hasError={Boolean(shownError)}
               />
 
-              {error ? (
+              {shownError ? (
                 <p role="alert" className="text-sm text-destructive">
-                  {error}
+                  {shownError}
                 </p>
               ) : null}
 
               <SweepButton
-                label="Verify & Continue"
+                label={isSubmitting ? "Verifying…" : "Verify & Continue"}
                 onClick={() => handleVerify()}
                 color="sidebar"
                 variant="filled"
@@ -180,9 +209,9 @@ export function CustomerAuthDialog() {
                 <button
                   type="button"
                   onClick={() => {
-                    setStep("phone");
                     setOtp("");
-                    setError(null);
+                    setLocalError(null);
+                    backToPhone();
                   }}
                   className="flex cursor-pointer items-center gap-1 text-muted-foreground transition-colors hover:text-secondary"
                 >
@@ -197,7 +226,7 @@ export function CustomerAuthDialog() {
                 ) : (
                   <button
                     type="button"
-                    onClick={() => setSecondsLeft(APP_CONFIG.otpExpirySeconds)}
+                    onClick={handleResend}
                     className="cursor-pointer font-semibold text-sidebar hover:underline"
                   >
                     Resend OTP

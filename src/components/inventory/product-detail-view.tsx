@@ -1,6 +1,13 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, ImageOff, Pencil, Trash2 } from "lucide-react";
+import type { Product } from "@/types/product.types";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ImageOff,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -30,7 +37,6 @@ import { APP_ROUTES } from "@/constants/routes";
 import { useDeleteProduct } from "@/hooks/use-delete-product";
 import { useProduct } from "@/hooks/use-product";
 import { cn } from "@/lib/utils";
-import type { Product } from "@/types/product.types";
 
 function formatPrice(value: string | null): string {
   if (!value) return "—";
@@ -78,7 +84,9 @@ function Gallery({ product }: { product: Product }) {
   }
 
   function step(direction: 1 | -1) {
-    setIndex((current) => (current + direction + images.length) % images.length);
+    setIndex(
+      (current) => (current + direction + images.length) % images.length,
+    );
   }
 
   return (

@@ -1,8 +1,7 @@
 "use client";
 
-import * as React from "react";
-
 import type { Product, ProductVariant } from "@/types/product.types";
+import * as React from "react";
 
 /**
  * Shared variant choice for a product page.

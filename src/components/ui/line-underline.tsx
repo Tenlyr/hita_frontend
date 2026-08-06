@@ -50,7 +50,10 @@ export function LineUnderline({
       const wrapperRect = wrapper.getBoundingClientRect();
 
       // One client rect per line fragment; merge any that share a baseline.
-      const byLine = new Map<number, { left: number; right: number; bottom: number }>();
+      const byLine = new Map<
+        number,
+        { left: number; right: number; bottom: number }
+      >();
       for (const rect of Array.from(range.getClientRects())) {
         if (rect.width === 0) continue;
         const key = Math.round(rect.top);

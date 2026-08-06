@@ -32,8 +32,16 @@ const MENU_BUTTON_CLASS =
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: APP_ROUTES.APP.DASHBOARD, icon: House },
-  { label: "Add Product", href: APP_ROUTES.APP.ADD_PRODUCT, icon: ShoppingCart },
-  { label: "Catalog Upload", href: APP_ROUTES.APP.CATALOG_UPLOAD, icon: Upload },
+  {
+    label: "Add Product",
+    href: APP_ROUTES.APP.ADD_PRODUCT,
+    icon: ShoppingCart,
+  },
+  {
+    label: "Catalog Upload",
+    href: APP_ROUTES.APP.CATALOG_UPLOAD,
+    icon: Upload,
+  },
   { label: "Inventory", href: APP_ROUTES.APP.INVENTORY, icon: Package },
   { label: "Orders", href: APP_ROUTES.APP.ORDERS, icon: Truck },
 ];

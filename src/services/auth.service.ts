@@ -1,11 +1,12 @@
-import api from "@/lib/axios";
-import type { ApiResponse } from "@/types/api.types";
 import type {
-  AdminLoginPayload,
   AuthTokens,
   AuthUser,
   RefreshedAccessToken,
-} from "@/types/auth.types";
+} from "@/types/session.types";
+import type { AdminLoginPayload } from "@/types/admin.auth.types";
+import type { OtpRequestResult } from "@/types/customer.auth.types";
+import api from "@/lib/axios";
+import type { ApiResponse } from "@/types/api.types";
 
 export const authService = {
   /** POST /auth/admin/login — email + password, admin console only. */
@@ -13,6 +14,24 @@ export const authService = {
     const { data } = await api.post<ApiResponse<AuthTokens>>(
       "/auth/admin/login",
       payload,
+    );
+    return data.data;
+  },
+
+  /** POST /auth/otp/request — start a customer phone login. */
+  async requestOtp(phoneNumber: string): Promise<OtpRequestResult> {
+    const { data } = await api.post<ApiResponse<OtpRequestResult>>(
+      "/auth/otp/request",
+      { phone_number: phoneNumber },
+    );
+    return data.data;
+  },
+
+  /** POST /auth/otp/verify — sign in, creating the customer on first use. */
+  async verifyOtp(phoneNumber: string, otp: string): Promise<AuthTokens> {
+    const { data } = await api.post<ApiResponse<AuthTokens>>(
+      "/auth/otp/verify",
+      { phone_number: phoneNumber, otp },
     );
     return data.data;
   },

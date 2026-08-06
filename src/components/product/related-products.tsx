@@ -1,11 +1,11 @@
 "use client";
 
+import type { Product } from "@/types/product.types";
 import * as React from "react";
 
 import { ProductCard } from "@/components/product/product-card";
 import { REVEAL_ITEM, useGsapReveal } from "@/hooks/use-gsap-reveal";
-import { catalogService } from "@/services/catalog.service";
-import type { Product } from "@/types/product.types";
+import { productService } from "@/services/product.service";
 
 const LIMIT = 4;
 
@@ -35,7 +35,7 @@ export function RelatedProducts({ productId }: { productId: number }) {
     async function load() {
       setIsLoading(true);
       try {
-        const result = await catalogService.related(productId, LIMIT);
+        const result = await productService.related(productId, LIMIT);
         if (!cancelled) setProducts(result);
       } catch {
         // Supplementary content — hide the section rather than show an error.

@@ -1,10 +1,10 @@
+import type { Product } from "@/types/product.types";
 import type {
-  Product,
   ProductCreatePayload,
   ProductDraft,
   ProductVariantDraft,
   ProductVariantPayload,
-} from "@/types/product.types";
+} from "@/types/admin.product.types";
 
 /** Blank inputs must go to the API as null, not "" — the columns are nullable. */
 function text(value: string): string | null {

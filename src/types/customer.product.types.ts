@@ -1,19 +1,17 @@
+/** Storefront browsing — listing queries, paged results, category tiles. */
+
 import type { Product } from "@/types/product.types";
 
-export interface CatalogCategory {
+export interface Category {
   name: string;
   image: string | null;
   product_count: number;
 }
 
-export type CatalogSort =
-  | "latest"
-  | "popular"
-  | "price_low"
-  | "price_high"
-  | "name";
+export type ProductSort =
+  "latest" | "popular" | "price_low" | "price_high" | "name";
 
-export const CATALOG_SORT_LABELS: Record<CatalogSort, string> = {
+export const SORT_LABELS: Record<ProductSort, string> = {
   popular: "Sort by Popularity",
   latest: "Sort by Latest",
   price_low: "Price: Low to High",
@@ -21,17 +19,17 @@ export const CATALOG_SORT_LABELS: Record<CatalogSort, string> = {
   name: "Name: A to Z",
 };
 
-export interface CatalogQuery {
+export interface ProductQuery {
   page?: number;
   page_size?: number;
   category?: string;
   sub_category?: string;
-  sort?: CatalogSort;
+  sort?: ProductSort;
   search?: string;
   in_stock?: boolean;
 }
 
-export interface CatalogPage {
+export interface ProductPage {
   results: Product[];
   count: number;
   page: number;

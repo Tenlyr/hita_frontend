@@ -1,5 +1,6 @@
 "use client";
 
+import type { Product, ProductVariant } from "@/types/product.types";
 import { Minus, Plus } from "lucide-react";
 import * as React from "react";
 import { toast } from "sonner";
@@ -7,7 +8,6 @@ import { toast } from "sonner";
 import { StarRating } from "@/components/product/star-rating";
 import { SweepButton } from "@/components/ui/sweep-button";
 import { cn } from "@/lib/utils";
-import type { Product, ProductVariant } from "@/types/product.types";
 
 function formatPrice(value: string | null): string {
   if (!value) return "—";
@@ -109,7 +109,9 @@ export function ProductPurchasePanel({
   }
 
   const shareUrl =
-    typeof window === "undefined" ? "" : encodeURIComponent(window.location.href);
+    typeof window === "undefined"
+      ? ""
+      : encodeURIComponent(window.location.href);
 
   return (
     <div className="flex flex-col gap-6">

@@ -1,7 +1,13 @@
-"use client"
+"use client";
 
-import { Toaster as Sonner, type ToasterProps } from "sonner"
-import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon } from "lucide-react"
+import { Toaster as Sonner, type ToasterProps } from "sonner";
+import {
+  CircleCheckIcon,
+  InfoIcon,
+  TriangleAlertIcon,
+  OctagonXIcon,
+  Loader2Icon,
+} from "lucide-react";
 
 // The app is light-only (next-themes was removed), so the theme is fixed
 // rather than read from a theme provider.
@@ -15,21 +21,11 @@ const Toaster = ({ ...props }: ToasterProps) => {
       theme="light"
       className="toaster group"
       icons={{
-        success: (
-          <CircleCheckIcon className="size-4 text-sidebar" />
-        ),
-        info: (
-          <InfoIcon className="size-4 text-sidebar" />
-        ),
-        warning: (
-          <TriangleAlertIcon className="size-4 text-sidebar" />
-        ),
-        error: (
-          <OctagonXIcon className="size-4 text-destructive" />
-        ),
-        loading: (
-          <Loader2Icon className="size-4 animate-spin text-sidebar" />
-        ),
+        success: <CircleCheckIcon className="size-4 text-sidebar" />,
+        info: <InfoIcon className="size-4 text-sidebar" />,
+        warning: <TriangleAlertIcon className="size-4 text-sidebar" />,
+        error: <OctagonXIcon className="size-4 text-destructive" />,
+        loading: <Loader2Icon className="size-4 animate-spin text-sidebar" />,
       }}
       style={
         {
@@ -47,7 +43,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }}
       {...props}
     />
-  )
-}
+  );
+};
 
-export { Toaster }
+export { Toaster };

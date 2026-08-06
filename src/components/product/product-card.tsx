@@ -1,5 +1,6 @@
 "use client";
 
+import type { Product } from "@/types/product.types";
 import { Heart, ImageOff, ShoppingCart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -9,7 +10,6 @@ import { StarRating } from "@/components/product/star-rating";
 import { LineUnderline } from "@/components/ui/line-underline";
 import { cn } from "@/lib/utils";
 import { useAuthDialogStore } from "@/store/auth-dialog.store";
-import type { Product } from "@/types/product.types";
 
 /** Cheapest variant price — the "from" price shoppers expect to see. */
 function lowestPrice(product: Product): string | null {
@@ -101,7 +101,9 @@ export function ProductCard({
           <Heart
             className={cn(
               "size-4 transition-colors",
-              wishlisted ? "fill-destructive text-destructive" : "text-secondary",
+              wishlisted
+                ? "fill-destructive text-destructive"
+                : "text-secondary",
             )}
           />
         </button>
