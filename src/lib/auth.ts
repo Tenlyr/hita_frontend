@@ -54,6 +54,17 @@ export function getCustomerAccessToken(): string | undefined {
   return Cookies.get(APP_CONFIG.accessTokenCookieName);
 }
 
+export function getCustomerRefreshToken(): string | undefined {
+  return Cookies.get(APP_CONFIG.refreshTokenCookieName);
+}
+
+export function setCustomerAccessToken(access: string): void {
+  Cookies.set(APP_CONFIG.accessTokenCookieName, access, {
+    ...COOKIE_OPTIONS,
+    expires: ACCESS_TOKEN_DAYS,
+  });
+}
+
 export function setCustomerSession({ access, refresh }: AuthTokens): void {
   Cookies.set(APP_CONFIG.accessTokenCookieName, access, {
     ...COOKIE_OPTIONS,

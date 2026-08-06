@@ -106,8 +106,10 @@ export function SweepButton({
   );
 
   if (href) {
+    // onClick still fires here — callers use it to close a dialog or sheet
+    // as they navigate.
     return (
-      <Link href={href} className={shared}>
+      <Link href={href} onClick={onClick} className={shared}>
         {content}
       </Link>
     );

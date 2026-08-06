@@ -3,9 +3,13 @@ import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { API_BASE_URL } from "@/constants/config";
 import {
   clearAdminSession,
+  clearCustomerSession,
   getAdminAccessToken,
   getAdminRefreshToken,
+  getCustomerAccessToken,
+  getCustomerRefreshToken,
   setAdminAccessToken,
+  setCustomerAccessToken,
 } from "@/lib/auth";
 
 const api = axios.create({
@@ -18,12 +22,43 @@ const api = axios.create({
 });
 
 /** Endpoints that issue tokens — a 401 here is bad credentials, not an expiry. */
-const AUTH_ENDPOINTS = ["/auth/admin/login", "/auth/refresh"];
+const AUTH_ENDPOINTS = [
+  "/auth/admin/login",
+  "/auth/refresh",
+  "/auth/otp/request",
+  "/auth/otp/verify",
+];
 
+type Audience = "admin" | "customer";
 type RetriableConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
+/**
+ * Admin and customer sessions live in separate cookies and can be active at
+ * once, so every request has to pick a side.
+ *
+ * `/admin/*` is unambiguous. `/auth/me`, `/auth/logout` and `/auth/refresh`
+ * serve both, so the browser location decides: the console only ever runs
+ * under /dashboard.
+ */
+function audienceFor(url = ""): Audience {
+  if (url.startsWith("/admin")) return "admin";
+  if (
+    typeof window !== "undefined" &&
+    window.location.pathname.startsWith("/dashboard")
+  ) {
+    return "admin";
+  }
+  return "customer";
+}
+
+function accessTokenFor(audience: Audience): string | undefined {
+  return audience === "admin"
+    ? (getAdminAccessToken() ?? getCustomerAccessToken())
+    : (getCustomerAccessToken() ?? getAdminAccessToken());
+}
+
 api.interceptors.request.use((config) => {
-  const token = getAdminAccessToken();
+  const token = accessTokenFor(audienceFor(config.url));
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -31,27 +66,30 @@ api.interceptors.request.use((config) => {
 });
 
 // Serialise concurrent refreshes so a burst of 401s triggers only one call.
-let refreshPromise: Promise<string> | null = null;
+const refreshPromises: Partial<Record<Audience, Promise<string> | null>> = {};
 
-function refreshAccessToken(): Promise<string> {
-  if (!refreshPromise) {
-    const refresh = getAdminRefreshToken();
+function refreshAccessToken(audience: Audience): Promise<string> {
+  if (!refreshPromises[audience]) {
+    const refresh =
+      audience === "admin" ? getAdminRefreshToken() : getCustomerRefreshToken();
+
     if (!refresh) {
       return Promise.reject(new Error("No refresh token available."));
     }
 
-    refreshPromise = axios
+    refreshPromises[audience] = axios
       .post(`${API_BASE_URL}/auth/refresh`, { refresh })
       .then((response) => {
         const access: string = response.data.data.access;
-        setAdminAccessToken(access);
+        if (audience === "admin") setAdminAccessToken(access);
+        else setCustomerAccessToken(access);
         return access;
       })
       .finally(() => {
-        refreshPromise = null;
+        refreshPromises[audience] = null;
       });
   }
-  return refreshPromise;
+  return refreshPromises[audience];
 }
 
 api.interceptors.response.use(
@@ -71,13 +109,15 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    const audience = audienceFor(config.url);
     config._retry = true;
     try {
-      const access = await refreshAccessToken();
+      const access = await refreshAccessToken(audience);
       config.headers.Authorization = `Bearer ${access}`;
       return api(config);
     } catch {
-      clearAdminSession();
+      if (audience === "admin") clearAdminSession();
+      else clearCustomerSession();
       return Promise.reject(error);
     }
   },

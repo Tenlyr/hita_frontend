@@ -7,8 +7,11 @@ import Link from "next/link";
 import * as React from "react";
 
 import { StarRating } from "@/components/product/star-rating";
+import { VariantPickerDialog } from "@/components/product/variant-picker-dialog";
 import { LineUnderline } from "@/components/ui/line-underline";
+import { firstAvailableVariant } from "@/lib/product";
 import { cn } from "@/lib/utils";
+import { useCart } from "@/hooks/use-cart";
 import { useWishlist } from "@/hooks/use-wishlist";
 
 /** Cheapest variant price — the "from" price shoppers expect to see. */
@@ -45,6 +48,8 @@ export function ProductCard({
   const price = lowestPrice(product);
 
   const { isWishlisted: isSaved, toggle } = useWishlist();
+  const { add } = useCart();
+  const [pickerOpen, setPickerOpen] = React.useState(false);
 
   // `isWishlisted` lets a parent drive the heart; otherwise the shared
   // wishlist store does, so every heart for a product stays in step.
@@ -56,6 +61,25 @@ export function ProductCard({
       return;
     }
     void toggle(product.id, product.product_name);
+  }
+
+  /**
+   * One variant is unambiguous, so add it straight away. Two or more and the
+   * card has no way to know which size, price or stock the shopper meant —
+   * that needs the picker.
+   */
+  function handleAddToCart() {
+    if (onAddToCart) {
+      onAddToCart(product);
+      return;
+    }
+    if (product.variants.length > 1) {
+      setPickerOpen(true);
+      return;
+    }
+    const variant = firstAvailableVariant(product.variants);
+    if (!variant) return;
+    void add(product, variant);
   }
 
   return (
@@ -108,7 +132,7 @@ export function ProductCard({
             it stays put and is always reachable. */}
         <button
           type="button"
-          onClick={() => onAddToCart?.(product)}
+          onClick={handleAddToCart}
           className="absolute inset-x-0 bottom-0 z-10 flex cursor-pointer items-center justify-center gap-2 bg-sidebar py-3 text-sm font-medium text-sidebar-foreground transition-transform duration-300 ease-out md:translate-y-full md:group-hover/card:translate-y-0"
         >
           <ShoppingCart className="size-4" />
@@ -134,6 +158,13 @@ export function ProductCard({
 
         <StarRating value={product.rating} />
       </div>
+
+      <VariantPickerDialog
+        product={product}
+        open={pickerOpen}
+        onOpenChange={setPickerOpen}
+        onConfirm={(variant, quantity) => void add(product, variant, quantity)}
+      />
     </article>
   );
 }

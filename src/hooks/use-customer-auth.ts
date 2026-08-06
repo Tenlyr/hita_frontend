@@ -1,10 +1,12 @@
 "use client";
 
 import * as React from "react";
+import { toast } from "sonner";
 
 import { getApiErrorMessage } from "@/lib/api-error";
 import { setCustomerSession } from "@/lib/auth";
 import { authService } from "@/services/auth.service";
+import { useCartStore } from "@/store/cart.store";
 import { useWishlistStore } from "@/store/wishlist.store";
 
 type Step = "phone" | "otp";
@@ -43,6 +45,20 @@ export function useCustomerAuth() {
         // The store was already marked loaded while signed out, so pull the
         // saved products in or every heart stays empty until a refresh.
         void useWishlistStore.getState().load();
+        // Hand the guest cart over. Awaited so the drawer and badge show the
+        // merged cart rather than briefly showing the local one.
+        const skipped = await useCartStore.getState().mergeOnLogin();
+        if (skipped.length > 0) {
+          const names = skipped
+            .map((line) => line.product_name)
+            .filter(Boolean)
+            .join(", ");
+          toast.warning(
+            skipped.length === 1
+              ? `${names || "1 item"} is no longer available and was removed from your cart.`
+              : `${skipped.length} items are no longer available and were removed from your cart.`,
+          );
+        }
         return true;
       } catch (err) {
         setError(getApiErrorMessage(err, "Could not verify the code."));

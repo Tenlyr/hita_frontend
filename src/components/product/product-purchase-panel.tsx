@@ -1,25 +1,17 @@
 "use client";
 
 import type { Product, ProductVariant } from "@/types/product.types";
-import { Minus, Plus } from "lucide-react";
 import * as React from "react";
 import { toast } from "sonner";
 
+import { QuantityStepper } from "@/components/product/quantity-stepper";
 import { StarRating } from "@/components/product/star-rating";
+import { VariantChips } from "@/components/product/variant-chips";
 import { BrandIcon, type BrandNetwork } from "@/components/ui/brand-icon";
 import { SweepButton } from "@/components/ui/sweep-button";
+import { useCart } from "@/hooks/use-cart";
+import { formatPrice, stockOf } from "@/lib/product";
 import { cn } from "@/lib/utils";
-
-function formatPrice(value: string | null): string {
-  if (!value) return "—";
-  const amount = Number(value);
-  if (Number.isNaN(amount)) return "—";
-  return `₹${amount.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`;
-}
-
-function stockOf(variant: ProductVariant | undefined): number {
-  return variant?.quantity_available ?? 0;
-}
 
 function Row({ children }: { children: React.ReactNode }) {
   return (
@@ -70,8 +62,9 @@ export function ProductPurchasePanel({
   onSelectVariant,
 }: ProductPurchasePanelProps) {
   const [quantity, setQuantity] = React.useState(1);
+  const { add } = useCart();
 
-  const stock = stockOf(selected ?? undefined);
+  const stock = stockOf(selected);
   const maxQuantity = Math.max(1, stock);
 
   function selectVariant(variant: ProductVariant) {
@@ -89,10 +82,7 @@ export function ProductPurchasePanel({
       toast.error("This size is out of stock.");
       return;
     }
-    // TODO: push to the cart once cart state exists.
-    toast.success(`${product.product_name} added to cart`, {
-      description: `${selected.size ?? "Default"} · Qty ${quantity}`,
-    });
+    void add(product, selected, quantity);
   }
 
   const shareUrl =
@@ -123,63 +113,23 @@ export function ProductPurchasePanel({
               {selected?.size ?? "Default"}
             </span>
           </p>
-          <div className="flex flex-wrap gap-2">
-            {product.variants.map((variant) => {
-              const isSelected = variant.id === selected?.id;
-              const isSoldOut = stockOf(variant) === 0;
-              return (
-                <button
-                  key={variant.id}
-                  type="button"
-                  onClick={() => selectVariant(variant)}
-                  disabled={isSoldOut}
-                  aria-pressed={isSelected}
-                  className={cn(
-                    "min-w-12 cursor-pointer border px-4 py-2 text-sm font-medium transition-colors",
-                    isSelected
-                      ? "border-primary bg-primary text-white"
-                      : "border-border text-secondary hover:border-primary",
-                    isSoldOut &&
-                      "cursor-not-allowed text-muted-foreground line-through opacity-50 hover:border-border",
-                  )}
-                >
-                  {variant.size ?? "Default"}
-                </button>
-              );
-            })}
-          </div>
+          <VariantChips
+            variants={product.variants}
+            selectedId={selected?.id ?? null}
+            onSelect={selectVariant}
+          />
         </div>
       ) : null}
 
       {/* Stepper and Add to Cart share a row: on mobile the button takes the
           remaining width instead of sitting narrow and off-centre. */}
       <div className="flex items-center gap-3">
-        <div className="flex shrink-0 items-center">
-          <button
-            type="button"
-            onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-            disabled={quantity <= 1}
-            aria-label="Decrease quantity"
-            className="flex size-11 cursor-pointer items-center justify-center bg-muted text-secondary transition-colors hover:bg-muted/70 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            <Minus className="size-4" />
-          </button>
-          <span
-            aria-live="polite"
-            className="w-12 text-center text-base font-medium text-secondary"
-          >
-            {quantity}
-          </span>
-          <button
-            type="button"
-            onClick={() => setQuantity((q) => Math.min(maxQuantity, q + 1))}
-            disabled={quantity >= maxQuantity}
-            aria-label="Increase quantity"
-            className="flex size-11 cursor-pointer items-center justify-center bg-muted text-secondary transition-colors hover:bg-muted/70 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            <Plus className="size-4" />
-          </button>
-        </div>
+        <QuantityStepper
+          value={quantity}
+          max={maxQuantity}
+          onChange={setQuantity}
+          disabled={stock === 0}
+        />
 
         <SweepButton
           label={stock === 0 ? "Out of Stock" : "Add to Cart"}
