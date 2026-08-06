@@ -34,6 +34,8 @@ export interface Product {
 /** A variant row while it is being edited — every field is a string in the DOM. */
 export interface ProductVariantDraft {
   key: string;
+  /** Set for variants that already exist server-side; absent means "new". */
+  id?: number;
   size: string;
   quantity_available: string;
   price: string;
@@ -61,6 +63,11 @@ export type ProductDraftErrors = Partial<Record<keyof ProductDraft, string>> & {
   variants?: string;
 };
 
+export interface ProductCategoryOptions {
+  categories: string[];
+  sub_categories: string[];
+}
+
 export interface ProductListParams {
   search?: string;
   page?: number;
@@ -79,6 +86,7 @@ export interface ProductListResult {
 
 /** Shape the API expects — empty strings become null, numbers become numbers. */
 export interface ProductVariantPayload {
+  id?: number;
   size: string | null;
   quantity_available: number | null;
   price: number | null;
@@ -100,4 +108,8 @@ export interface ProductCreatePayload {
   care_instruction: string | null;
   usage_instruction: string | null;
   variants: ProductVariantPayload[];
+}
+
+export interface ProductUpdatePayload extends ProductCreatePayload {
+  removed_image_ids: number[];
 }

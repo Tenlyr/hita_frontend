@@ -44,7 +44,7 @@ export function DashboardSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="py-5 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-4">
+      <SidebarHeader className="py-2 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-2">
         <Link
           href={APP_ROUTES.APP.DASHBOARD}
           className="flex items-center justify-center"
@@ -55,7 +55,7 @@ export function DashboardSidebar() {
             width={87}
             height={49}
             priority
-            className="h-12 w-auto group-data-[collapsible=icon]:h-9"
+            className="h-12 w-auto group-data-[collapsible=icon]:h-12"
           />
         </Link>
       </SidebarHeader>

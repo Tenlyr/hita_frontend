@@ -1,6 +1,15 @@
 import type { Metadata } from "next";
-import { Geist_Mono } from "next/font/google";
+import { Geist_Mono, Lato } from "next/font/google";
 import "./globals.css";
+
+// Lato is the app-wide default so portalled UI (popovers, tooltips, toasts,
+// sheets) inherits it — those render into <body>, outside any section layout.
+// The landing section overrides --font-sans with Josefin Sans locally.
+const lato = Lato({
+  variable: "--font-sans",
+  subsets: ["latin"],
+  weight: ["100", "300", "400", "700", "900"],
+});
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -20,7 +29,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistMono.variable} antialiased`}
+      className={`${lato.variable} ${geistMono.variable} font-sans antialiased`}
       suppressHydrationWarning
     >
       {/* No height:100% chain here — percentage heights on html/body stop

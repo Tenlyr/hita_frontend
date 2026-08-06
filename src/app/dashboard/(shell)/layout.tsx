@@ -24,16 +24,18 @@ export default function DashboardShellLayout({
         }
       >
         <DashboardSidebar />
-        <SidebarInset className="bg-muted">
+        {/* min-w-0: without it this flex item keeps min-width:auto and wide
+            children (tables) stretch the page instead of scrolling. */}
+        <SidebarInset className="min-w-0 bg-muted">
           <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 border-b border-border bg-background px-4">
             <SidebarTrigger className="size-8" />
             <div className="ml-auto">
               <DashboardUserProfile />
             </div>
           </header>
-          <div className="flex-1 p-4 sm:p-6">{children}</div>
+          <div className="min-w-0 flex-1 p-4 sm:p-6">{children}</div>
         </SidebarInset>
-        <Toaster position="bottom-right" richColors closeButton />
+        <Toaster position="top-center" />
       </SidebarProvider>
     </TooltipProvider>
   );

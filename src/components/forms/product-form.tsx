@@ -2,6 +2,7 @@
 
 import { ImagePlus, Plus, Trash2, X } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import * as React from "react";
 import { toast } from "sonner";
 
@@ -23,9 +24,14 @@ import {
   PRODUCT_SECTIONS,
   VARIANT_FIELDS,
 } from "@/constants/product";
-import { useAddProduct } from "@/hooks/use-add-product";
+import { CreatableCombobox } from "@/components/ui/creatable-combobox";
+import { APP_ROUTES } from "@/constants/routes";
+import { useCategoryOptions } from "@/hooks/use-category-options";
+import { useSaveProduct } from "@/hooks/use-save-product";
+import { toProductDraft } from "@/lib/product-payload";
 import { cn } from "@/lib/utils";
 import type {
+  Product,
   ProductDraft,
   ProductDraftErrors,
   ProductVariantDraft,
@@ -78,16 +84,31 @@ function validate(draft: ProductDraft): ProductDraftErrors {
   return errors;
 }
 
-export function AddProductForm() {
+interface ProductFormProps {
+  /** Omit to create; pass a saved product to edit it. */
+  product?: Product;
+}
+
+export function ProductForm({ product }: ProductFormProps) {
+  const router = useRouter();
+  const isEdit = product !== undefined;
+
   // useId is stable across server render and hydration, unlike a random uuid.
   const formId = React.useId();
   const [draft, setDraft] = React.useState<ProductDraft>(() =>
-    initialDraft(`${formId}-variant-0`),
+    product ? toProductDraft(product) : initialDraft(`${formId}-variant-0`),
   );
   const [images, setImages] = React.useState<ImageDraft[]>([]);
+  const [existingImages, setExistingImages] = React.useState(
+    product?.images ?? [],
+  );
+  const [removedImageIds, setRemovedImageIds] = React.useState<number[]>([]);
   const [errors, setErrors] = React.useState<ProductDraftErrors>({});
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const { submit, reset, isSubmitting, error, fieldErrors } = useAddProduct();
+  const { save, reset, isSubmitting, error, fieldErrors } = useSaveProduct(
+    product?.id,
+  );
+  const { categories, subCategories, remember, reload } = useCategoryOptions();
 
   // Object URLs must be released or the blobs leak for the page's lifetime.
   React.useEffect(() => {
@@ -159,6 +180,12 @@ export function AddProductForm() {
     });
   }
 
+  /** Removal is only committed on save, so it stays cancellable. */
+  function removeExistingImage(id: number) {
+    setExistingImages((previous) => previous.filter((image) => image.id !== id));
+    setRemovedImageIds((previous) => [...previous, id]);
+  }
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const nextErrors = validate(draft);
@@ -167,24 +194,42 @@ export function AddProductForm() {
       return;
     }
 
-    const product = await submit(
+    const saved = await save({
       draft,
-      images.map((image) => image.file),
-    );
-    if (product) {
-      handleReset();
-      toast.success(`${product.product_name ?? "Product"} was saved`, {
-        description: `${product.variants.length} variant(s) and ${product.images.length} image(s) added to the catalogue.`,
-      });
+      images: images.map((image) => image.file),
+      removedImageIds,
+    });
+    if (!saved) return;
+
+    // Pick up any category this product just introduced.
+    void reload();
+
+    if (isEdit) {
+      toast.success(`${saved.product_name ?? "Product"} was updated`);
+      router.push(`${APP_ROUTES.APP.PRODUCTS}/${saved.id}`);
+      return;
     }
+
+    handleReset();
+    toast.success(`${saved.product_name ?? "Product"} was saved`, {
+      description: `${saved.variants.length} variant(s) and ${saved.images.length} image(s) added to the catalogue.`,
+    });
   }
 
   function handleReset() {
     images.forEach((image) => URL.revokeObjectURL(image.previewUrl));
     setImages([]);
-    setDraft(initialDraft());
     setErrors({});
     reset();
+
+    if (product) {
+      // Editing: back to the saved state, not an empty form.
+      setDraft(toProductDraft(product));
+      setExistingImages(product.images);
+      setRemovedImageIds([]);
+    } else {
+      setDraft(initialDraft());
+    }
   }
 
   return (
@@ -237,23 +282,31 @@ export function AddProductForm() {
 
           <div className="space-y-2">
             <Label htmlFor="category">Category</Label>
-            <Input
+            <CreatableCombobox
               id="category"
               value={draft.category}
-              onChange={(event) => setField("category", event.target.value)}
-              placeholder="Decor"
-              className={FIELD_CLASS}
+              onChange={(value) => {
+                setField("category", value);
+                remember("category", value);
+              }}
+              options={categories}
+              placeholder="Select or add a category"
+              emptyHint="No categories yet — type to add the first"
             />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="sub_category">Sub category</Label>
-            <Input
+            <CreatableCombobox
               id="sub_category"
               value={draft.sub_category}
-              onChange={(event) => setField("sub_category", event.target.value)}
-              placeholder="Vases"
-              className={FIELD_CLASS}
+              onChange={(value) => {
+                setField("sub_category", value);
+                remember("sub_category", value);
+              }}
+              options={subCategories}
+              placeholder="Select or add a sub category"
+              emptyHint="No sub categories yet — type to add the first"
             />
           </div>
 
@@ -366,6 +419,35 @@ export function AddProductForm() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-4">
+            {existingImages.map((image, index) => (
+              <div
+                key={image.id}
+                className="group relative size-28 border border-border"
+              >
+                <Image
+                  src={image.product_image}
+                  alt=""
+                  fill
+                  unoptimized
+                  sizes="112px"
+                  className="object-cover"
+                />
+                {index === 0 ? (
+                  <span className="absolute top-0 left-0 bg-primary px-1.5 py-0.5 text-[10px] font-bold text-white">
+                    THUMBNAIL
+                  </span>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => removeExistingImage(image.id)}
+                  aria-label="Remove image"
+                  className="absolute -top-2 -right-2 cursor-pointer rounded-full bg-secondary p-1 text-white opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+                >
+                  <X className="size-3.5" />
+                </button>
+              </div>
+            ))}
+
             {images.map((image, index) => (
               <div
                 key={image.key}
@@ -378,7 +460,7 @@ export function AddProductForm() {
                   unoptimized
                   className="object-cover"
                 />
-                {index === 0 ? (
+                {index === 0 && existingImages.length === 0 ? (
                   <span className="absolute top-0 left-0 bg-primary px-1.5 py-0.5 text-[10px] font-bold text-white">
                     THUMBNAIL
                   </span>
@@ -486,6 +568,17 @@ export function AddProductForm() {
       </Card>
 
       <div className="flex flex-col-reverse gap-3 border-t border-border pt-6 sm:flex-row sm:justify-end">
+        {isEdit ? (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.back()}
+            disabled={isSubmitting}
+            className={cn(FIELD_CLASS, "cursor-pointer px-8 sm:mr-auto")}
+          >
+            Cancel
+          </Button>
+        ) : null}
         <Button
           type="button"
           variant="outline"
@@ -493,7 +586,7 @@ export function AddProductForm() {
           disabled={isSubmitting}
           className={cn(FIELD_CLASS, "cursor-pointer px-8")}
         >
-          Reset
+          {isEdit ? "Revert" : "Reset"}
         </Button>
         <Button
           type="submit"
@@ -503,7 +596,11 @@ export function AddProductForm() {
             "relative isolate cursor-pointer overflow-hidden border-sidebar bg-transparent px-10 text-white transition-colors duration-300 hover:bg-transparent hover:text-sidebar before:absolute before:inset-0 before:-z-10 before:bg-sidebar before:transition-transform before:duration-300 before:ease-out hover:before:-translate-x-full",
           )}
         >
-          {isSubmitting ? "Saving…" : "Save Product"}
+          {isSubmitting
+            ? "Saving…"
+            : isEdit
+              ? "Save Changes"
+              : "Save Product"}
         </Button>
       </div>
     </form>

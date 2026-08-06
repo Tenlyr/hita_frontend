@@ -1,12 +1,6 @@
-import { Josefin_Sans } from "next/font/google";
-
+import { CustomerAuthDialog } from "@/components/auth/customer-auth-dialog";
 import { SiteHeader } from "@/components/layout/site-header";
-
-const josefinSans = Josefin_Sans({
-  variable: "--font-sans",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-});
+import { josefinSans } from "@/lib/fonts";
 
 export default function LandingLayout({
   children,
@@ -19,6 +13,8 @@ export default function LandingLayout({
     >
       <SiteHeader />
       {children}
+      {/* One shared instance, opened from anywhere via the auth dialog store. */}
+      <CustomerAuthDialog />
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import type {
+  Product,
   ProductCreatePayload,
   ProductDraft,
   ProductVariantDraft,
@@ -20,6 +21,7 @@ function numeric(value: string): number | null {
 
 function toVariantPayload(variant: ProductVariantDraft): ProductVariantPayload {
   return {
+    ...(variant.id ? { id: variant.id } : {}),
     size: text(variant.size),
     quantity_available: numeric(variant.quantity_available),
     price: numeric(variant.price),
@@ -46,5 +48,35 @@ export function toProductPayload(draft: ProductDraft): ProductCreatePayload {
     variants: draft.variants
       .filter((variant) => variant.size.trim() || variant.price.trim())
       .map(toVariantPayload),
+  };
+}
+
+/** Turns a saved product back into editable form state. */
+export function toProductDraft(product: Product): ProductDraft {
+  return {
+    product_name: product.product_name ?? "",
+    category: product.category ?? "",
+    sub_category: product.sub_category ?? "",
+    made_in: product.made_in ?? "",
+    rating: product.rating === null ? "" : String(product.rating),
+    is_hot_sale: product.is_hot_sale,
+    description: product.description ?? "",
+    care_instruction: product.care_instruction ?? "",
+    usage_instruction: product.usage_instruction ?? "",
+    variants: product.variants.map((variant) => ({
+      key: `variant-${variant.id}`,
+      id: variant.id,
+      size: variant.size ?? "",
+      quantity_available:
+        variant.quantity_available === null
+          ? ""
+          : String(variant.quantity_available),
+      price: variant.price ?? "",
+      length_in_cm: variant.length_in_cm ?? "",
+      width_in_cm: variant.width_in_cm ?? "",
+      height_in_cm: variant.height_in_cm ?? "",
+      diameter_in_cm: variant.diameter_in_cm ?? "",
+      offer: variant.offer ?? "",
+    })),
   };
 }

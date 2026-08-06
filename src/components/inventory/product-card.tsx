@@ -1,9 +1,11 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, ImageOff, Star } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, ImageOff, Pencil, Star } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import * as React from "react";
 
+import { APP_ROUTES } from "@/constants/routes";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/types/product.types";
 
@@ -65,10 +67,30 @@ export function ProductCard({ product }: { product: Product }) {
         )}
 
         {product.is_hot_sale ? (
-          <span className="absolute top-2 left-2 bg-primary px-2 py-0.5 text-[10px] font-bold tracking-wide text-white">
+          <span className="absolute top-2 left-2 z-10 bg-primary px-2 py-0.5 text-[10px] font-bold tracking-wide text-white">
             HOT SALE
           </span>
         ) : null}
+
+        {/* Hover actions. focus-within keeps them reachable by keyboard. */}
+        <div className="absolute inset-0 flex items-center justify-center gap-3 bg-secondary/45 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+          <Link
+            href={`${APP_ROUTES.APP.PRODUCTS}/${product.id}`}
+            aria-label={`View ${product.product_name ?? "product"}`}
+            title="View details"
+            className="cursor-pointer rounded-full bg-background p-2.5 text-secondary shadow transition-colors hover:bg-primary hover:text-white"
+          >
+            <Eye className="size-4" />
+          </Link>
+          <Link
+            href={`${APP_ROUTES.APP.PRODUCTS}/${product.id}/edit`}
+            aria-label={`Edit ${product.product_name ?? "product"}`}
+            title="Edit product"
+            className="cursor-pointer rounded-full bg-background p-2.5 text-secondary shadow transition-colors hover:bg-primary hover:text-white"
+          >
+            <Pencil className="size-4" />
+          </Link>
+        </div>
 
         {hasCarousel ? (
           <>
@@ -144,7 +166,7 @@ export function ProductCard({ product }: { product: Product }) {
           </div>
 
           {offer ? (
-            <span className="bg-primary/10 px-2 py-1 text-xs font-bold text-primary">
+            <span className="shrink-0 bg-primary/10 px-2 py-1 text-xs font-bold whitespace-nowrap text-primary">
               {offer}
             </span>
           ) : null}

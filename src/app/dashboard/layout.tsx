@@ -1,17 +1,9 @@
-import { Lato } from "next/font/google";
-
-const lato = Lato({
-  variable: "--font-sans",
-  subsets: ["latin"],
-  weight: ["100", "300", "400", "700", "900"],
-});
-
+// Lato now comes from the root layout so portalled UI inherits it too; this
+// layout stays as the dashboard section boundary.
 export default function DashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <div className={`${lato.variable} font-sans contents`}>{children}</div>
-  );
+  return children;
 }
