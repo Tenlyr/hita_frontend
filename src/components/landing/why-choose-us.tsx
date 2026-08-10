@@ -1,4 +1,8 @@
+"use client";
+
 import Image from "next/image";
+
+import { REVEAL_ITEM, useGsapReveal } from "@/hooks/use-gsap-reveal";
 
 const FEATURES = [
   {
@@ -28,6 +32,10 @@ const FEATURES = [
 ];
 
 export function WhyChooseUs() {
+  // Same lift-and-fade the product grid uses, so the page reads as one
+  // sequence rather than each section having its own idea of an entrance.
+  const containerRef = useGsapReveal<HTMLDivElement>({ stagger: 0.1 });
+
   return (
     <section className="relative isolate overflow-hidden py-16 sm:py-24">
       <Image
@@ -41,14 +49,14 @@ export function WhyChooseUs() {
       {/* Softens the photo so the copy stays legible over it. */}
       <div className="absolute inset-0 -z-10 bg-background/55" />
 
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6">
-        <header className="max-w-xl">
+      <div ref={containerRef} className="mx-auto w-full max-w-7xl px-4 sm:px-6">
+        <header className={`${REVEAL_ITEM} max-w-xl`}>
           <Image
             src="/icons/ic_why_choose.svg"
             alt=""
             width={64}
             height={63}
-            className="h-16 w-auto sm:h-24"
+            className="h-12 w-auto sm:h-20"
           />
           <h2 className="mt-4 text-2xl font-black text-secondary sm:text-3xl">
             Why you Choose Us
@@ -66,7 +74,7 @@ export function WhyChooseUs() {
               key={feature.title}
               // Soft shadow spread on every side rather than cast downward,
               // so the card reads as floating off the photo.
-              className="rounded-2xl bg-background/85 p-6 shadow-[0_4px_36px_rgba(23,36,48,0.14)] backdrop-blur-sm transition-shadow duration-300 hover:shadow-[0_8px_48px_rgba(23,36,48,0.20)]"
+              className={`${REVEAL_ITEM} rounded-2xl bg-background/85 p-6 shadow-[0_4px_36px_rgba(23,36,48,0.14)] backdrop-blur-sm transition-shadow duration-300 hover:shadow-[0_8px_48px_rgba(23,36,48,0.20)]`}
             >
               <Image
                 src={feature.icon}

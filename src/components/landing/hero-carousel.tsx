@@ -1,17 +1,8 @@
-"use client";
-
-import * as React from "react";
-
-import { ResponsiveSlideImage } from "@/components/carousel/slide-image";
-import { ResponsiveSlideCanvas } from "@/components/carousel/slide-canvas";
-import { useFillViewport } from "@/hooks/use-fill-viewport";
-import { carouselService } from "@/services/carousel.service";
-import { cn } from "@/lib/utils";
+import { HeroCarouselView } from "@/components/landing/hero-carousel-view";
+import { API_BASE_URL } from "@/constants/config";
 import type { CarouselSlide } from "@/types/carousel.types";
 
-const AUTOPLAY_MS = 6000;
-
-/** Shown until slides exist in the console, so home is never a grey box. */
+/** Shown when no slide is live yet, so home is never a grey box. */
 const FALLBACK: CarouselSlide = {
   id: 0,
   title: "Default banner",
@@ -31,96 +22,34 @@ const FALLBACK: CarouselSlide = {
   sort_order: 0,
 };
 
-export function HeroCarousel() {
-  const { ref, style } = useFillViewport<HTMLElement>();
-  const [slides, setSlides] = React.useState<CarouselSlide[]>([FALLBACK]);
-  const [index, setIndex] = React.useState(0);
+/** Long enough to stay off the API on every visit, short enough that a slide
+    published in the console shows up without a redeploy. */
+const REVALIDATE_SECONDS = 60;
 
-  React.useEffect(() => {
-    let cancelled = false;
+async function loadSlides(): Promise<CarouselSlide[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/carousel`, {
+      next: { revalidate: REVALIDATE_SECONDS },
+      headers: { "ngrok-skip-browser-warning": "true" },
+    });
+    if (!response.ok) return [];
+    const body = await response.json();
+    return body?.data?.results ?? [];
+  } catch {
+    // The API being down should cost the banner, not the page.
+    return [];
+  }
+}
 
-    async function load() {
-      try {
-        const result = await carouselService.listPublic();
-        if (!cancelled && result.results.length > 0) {
-          setSlides(result.results);
-          setIndex(0);
-        }
-      } catch {
-        // Keep the fallback banner rather than an empty hero.
-      }
-    }
-
-    void load();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  React.useEffect(() => {
-    if (slides.length < 2) return;
-    const timer = window.setInterval(
-      () => setIndex((current) => (current + 1) % slides.length),
-      AUTOPLAY_MS,
-    );
-    return () => window.clearInterval(timer);
-  }, [slides.length]);
-
-  return (
-    <section
-      ref={ref}
-      aria-roledescription="carousel"
-      aria-label="Featured"
-      style={style}
-      // min-h-72 is the pre-measurement fallback; `style` overrides it once
-      // the height is known.
-      className="relative min-h-72 w-full overflow-hidden bg-muted"
-    >
-      {slides.map((slide, position) => (
-        <div
-          key={slide.id}
-          aria-hidden={position !== index}
-          className={cn(
-            "absolute inset-0 transition-opacity duration-500",
-            position === index
-              ? "opacity-100"
-              : "pointer-events-none opacity-0",
-          )}
-        >
-          <ResponsiveSlideImage
-            mobile={slide.image_mobile}
-            tablet={slide.image_tablet}
-            desktop={slide.image_desktop}
-            focus={slide.image_focus}
-            alt={slide.title}
-            // The hero is the largest paint above the fold.
-            priority={position === 0}
-          />
-          <ResponsiveSlideCanvas
-            blocks={slide.blocks}
-            overlayOpacity={slide.overlay_opacity}
-          />
-        </div>
-      ))}
-
-      {/* A single slide has nothing to indicate. */}
-      {slides.length > 1 ? (
-        <div className="absolute top-1/2 right-4 z-10 flex -translate-y-1/2 flex-col gap-3 sm:right-6">
-          {slides.map((slide, dot) => (
-            <button
-              key={slide.id}
-              type="button"
-              onClick={() => setIndex(dot)}
-              aria-label={`Go to slide ${dot + 1}`}
-              aria-current={dot === index}
-              className={cn(
-                "size-2.5 cursor-pointer rounded-full transition-colors",
-                dot === index ? "bg-primary" : "bg-secondary",
-              )}
-            />
-          ))}
-        </div>
-      ) : null}
-    </section>
-  );
+/**
+ * Fetched on the server on purpose.
+ *
+ * Loading slides in the browser meant the fallback banner painted first and
+ * was then replaced a moment later — a visible swap on every cold load. Doing
+ * it here puts the real slides in the initial HTML, so the first frame the
+ * visitor sees is already the right one.
+ */
+export async function HeroCarousel() {
+  const slides = await loadSlides();
+  return <HeroCarouselView slides={slides.length > 0 ? slides : [FALLBACK]} />;
 }

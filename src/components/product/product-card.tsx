@@ -128,12 +128,13 @@ export function ProductCard({
           />
         </button>
 
-        {/* Slides up on hover. Touch screens have no hover, so from md down
-            it stays put and is always reachable. */}
+        {/* A hover affordance, so it never appears on a touch screen. Small
+            screens get their own button down in the price row instead, where
+            it does not cover the photo. */}
         <button
           type="button"
           onClick={handleAddToCart}
-          className="absolute inset-x-0 bottom-0 z-10 flex cursor-pointer items-center justify-center gap-2 bg-sidebar py-3 text-sm font-medium text-sidebar-foreground transition-transform duration-300 ease-out md:translate-y-full md:group-hover/card:translate-y-0"
+          className="absolute inset-x-0 bottom-0 z-10 hidden cursor-pointer items-center justify-center gap-2 bg-sidebar py-3 text-sm font-medium text-sidebar-foreground transition-transform duration-300 ease-out md:flex md:translate-y-full md:group-hover/card:translate-y-0"
         >
           <ShoppingCart className="size-4" />
           Add to Cart
@@ -141,11 +142,24 @@ export function ProductCard({
       </div>
 
       <div className="flex flex-1 flex-col gap-3 pt-4">
-        {price ? (
-          <p className="text-lg font-medium text-secondary sm:text-xl">
-            {price}
-          </p>
-        ) : null}
+        <div className="flex items-center gap-3">
+          {price ? (
+            <p className="text-lg font-medium text-secondary sm:text-xl">
+              {price}
+            </p>
+          ) : null}
+
+          {/* `ml-auto` rather than `justify-between`, so it still sits right
+              on a product with no price to show. */}
+          <button
+            type="button"
+            onClick={handleAddToCart}
+            aria-label={`Add ${product.product_name} to cart`}
+            className="ml-auto shrink-0 cursor-pointer rounded-full bg-sidebar p-2 text-sidebar-foreground transition-transform hover:scale-110 md:hidden"
+          >
+            <ShoppingCart className="size-3.5" />
+          </button>
+        </div>
 
         <Link
           href={href ?? `/products/${product.id}`}

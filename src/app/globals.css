@@ -92,3 +92,13 @@
     @apply font-sans;
   }
 }
+/* Referenced by the category rail, the product gallery and the about collage,
+   but never defined — so those rows have been showing a scrollbar. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

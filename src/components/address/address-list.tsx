@@ -95,8 +95,8 @@ export function AddressList({
 
       {isLoading ? (
         <div className="space-y-4">
-          <div className="h-36 animate-pulse bg-muted" />
-          <div className="h-36 animate-pulse bg-muted" />
+          <div className="h-28 animate-pulse bg-muted" />
+          <div className="h-28 animate-pulse bg-muted" />
         </div>
       ) : addresses.length === 0 ? (
         <div className="flex flex-col items-center gap-4 border border-dashed border-border px-6 py-14 text-center">
@@ -118,7 +118,7 @@ export function AddressList({
           />
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {addresses.map((address) => (
             <AddressCard
               key={address.id}

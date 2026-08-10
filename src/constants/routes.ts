@@ -23,6 +23,7 @@ export const APP_ROUTES = {
     CATALOG_UPLOAD: "/dashboard/catalog-upload",
     CAROUSEL: "/dashboard/carousel",
     INVENTORY: "/dashboard/inventory",
+    MESSAGES: "/dashboard/messages",
     ORDERS: "/dashboard/orders",
   },
   ADMIN: {

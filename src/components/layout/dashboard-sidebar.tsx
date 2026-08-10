@@ -3,6 +3,7 @@
 import {
   ChevronRight,
   GalleryHorizontalEnd,
+  Inbox,
   House,
   LogOut,
   Package,
@@ -29,7 +30,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 // Rows stay 2.5rem tall in both states — only the width collapses to a square.
 // mx-auto centres that square in the 4.5rem rail set on SidebarProvider.
 const MENU_BUTTON_CLASS =
-  "h-10 gap-3 px-3 text-sm font-semibold data-active:font-semibold group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:size-10! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-2.5!";
+  "h-10 gap-3 px-4 text-sm font-medium data-active:font-medium group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:size-10! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-2.5!";
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: APP_ROUTES.APP.DASHBOARD, icon: House },
@@ -50,6 +51,7 @@ const NAV_ITEMS = [
   },
   { label: "Inventory", href: APP_ROUTES.APP.INVENTORY, icon: Package },
   { label: "Orders", href: APP_ROUTES.APP.ORDERS, icon: Truck },
+  { label: "Messages", href: APP_ROUTES.APP.MESSAGES, icon: Inbox },
 ];
 
 export function DashboardSidebar() {
@@ -75,7 +77,7 @@ export function DashboardSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="px-2 py-2">
-        <SidebarMenu className="gap-1">
+        <SidebarMenu className="gap-2">
           {NAV_ITEMS.map((item) => {
             const isActive = pathname === item.href;
             return (

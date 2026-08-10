@@ -17,6 +17,7 @@ import {
 import { SweepButton } from "@/components/ui/sweep-button";
 import { APP_ROUTES } from "@/constants/routes";
 import { useCart } from "@/hooks/use-cart";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { hasCustomerSession } from "@/lib/auth";
 import { josefinSans } from "@/lib/fonts";
 import { formatPrice } from "@/lib/product";
@@ -107,6 +108,7 @@ export function CartSheet() {
   const close = useCartSheetStore((state) => state.close);
   const openAuthDialog = useAuthDialogStore((state) => state.open);
   const router = useRouter();
+  const isMobile = useIsMobile();
   const { items, count, updateQuantity, remove } = useCart();
 
   // Paise arithmetic lives in the store; this only reads the result.
@@ -128,10 +130,21 @@ export function CartSheet() {
   return (
     <Sheet open={isOpen} onOpenChange={setOpen}>
       <SheetContent
-        side="right"
+        // A thumb reaches the bottom of a phone far more easily than the far
+        // edge of a side drawer, so small screens get a bottom sheet.
+        side={isMobile ? "bottom" : "right"}
         // Portalled into <body>, so the storefront typeface is applied here
         // explicitly rather than inherited.
-        className={cn(josefinSans.variable, "font-sans w-full sm:max-w-md")}
+        className={cn(
+          josefinSans.variable,
+          "font-sans",
+          isMobile
+            ? // `h-auto` on the bottom variant means the list has nothing to
+              // scroll inside — the cap is what makes it scroll instead of
+              // running off the top of the screen.
+              "max-h-[85vh] w-full max-w-none"
+            : "w-full sm:max-w-md",
+        )}
       >
         <SheetHeader className="border-b border-border">
           <SheetTitle className="text-xl font-black text-secondary">

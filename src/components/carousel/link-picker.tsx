@@ -33,7 +33,9 @@ const DESTINATIONS = [
   { value: CUSTOM, label: "Custom URL…" },
 ];
 
-const TRIGGER_CLASS = "h-10 w-full rounded-none";
+/* `h-10` alone loses to SelectTrigger's `data-[size=default]:h-8`, which is an
+   attribute selector and therefore more specific. */
+const TRIGGER_CLASS = "h-10! w-full rounded-none";
 const ITEM_CLASS = "py-2.5 rounded-none";
 
 const productHref = (id: number) => `${APP_ROUTES.SHOP.PRODUCTS}/${id}`;
