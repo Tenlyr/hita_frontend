@@ -1,9 +1,6 @@
 "use client";
 
-import type {
-  Category,
-  ProductQuery,
-} from "@/types/customer.product.types";
+import type { Category, ProductQuery } from "@/types/customer.product.types";
 import { Loader2, PackageSearch } from "lucide-react";
 import { useRouter } from "next/navigation";
 import * as React from "react";
@@ -48,6 +45,9 @@ export function ProductGrid({
 
     const params = new URLSearchParams();
     if (next.category) params.set("category", next.category);
+    // Carried through: changing a filter must not silently drop the search
+    // the results are answering.
+    if (next.search) params.set("search", next.search);
     if (next.sort && next.sort !== "popular") params.set("sort", next.sort);
     if (next.in_stock) params.set("in_stock", "true");
 

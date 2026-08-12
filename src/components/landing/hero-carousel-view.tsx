@@ -11,15 +11,18 @@ import type { CarouselSlide } from "@/types/carousel.types";
 
 const AUTOPLAY_MS = 6000;
 
-/* On load the first slide settles from slightly enlarged to its resting size —
-   a camera easing into place. Opacity is left alone so nothing flashes over
-   the server-painted frame. */
-const INTRO_SCALE = 1.08;
-const INTRO_DURATION = 1.4;
+/* Everything grows into place. On load the first slide opens out from
+   slightly small to its resting size; opacity is left alone so nothing
+   flashes over the server-painted frame. */
+const INTRO_SCALE = 0.92;
+const INTRO_DURATION = 0.9;
 
-/* Every change after that swipes: the two slides travel together, so the
-   motion says "next" rather than "different". */
-const SWIPE_DURATION = 0.8;
+/* Changes are a cross-zoom rather than a swipe: the incoming slide grows in
+   from the same starting size while the outgoing one drifts back and fades. */
+const IN_SCALE = 0.9;
+const OUT_SCALE = 1.05;
+const IN_DURATION = 0.6;
+const OUT_DURATION = 0.5;
 
 export function HeroCarouselView({ slides }: { slides: CarouselSlide[] }) {
   const { ref, style } = useFillViewport<HTMLElement>();
@@ -43,16 +46,16 @@ export function HeroCarouselView({ slides }: { slides: CarouselSlide[] }) {
         Boolean(node) && node !== incoming && node !== outgoing,
     );
     // Anything not part of this transition is parked, so a fast click that
-    // interrupts a tween cannot strand a slide mid-travel.
-    gsap.set(rest, { autoAlpha: 0, xPercent: 0, scale: 1 });
+    // interrupts a tween cannot strand a slide mid-zoom.
+    gsap.set(rest, { autoAlpha: 0, scale: 1 });
 
     const reduced = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
 
     if (reduced) {
-      if (outgoing) gsap.set(outgoing, { autoAlpha: 0, xPercent: 0 });
-      gsap.set(incoming, { autoAlpha: 1, xPercent: 0, scale: 1 });
+      if (outgoing) gsap.set(outgoing, { autoAlpha: 0, scale: 1 });
+      gsap.set(incoming, { autoAlpha: 1, scale: 1 });
       hasPainted.current = true;
       return;
     }
@@ -60,7 +63,7 @@ export function HeroCarouselView({ slides }: { slides: CarouselSlide[] }) {
     // First paint: the frame is already on screen, so only the scale moves.
     if (!hasPainted.current) {
       hasPainted.current = true;
-      gsap.set(incoming, { autoAlpha: 1, xPercent: 0 });
+      gsap.set(incoming, { autoAlpha: 1 });
       gsap.fromTo(
         incoming,
         { scale: INTRO_SCALE },
@@ -70,33 +73,30 @@ export function HeroCarouselView({ slides }: { slides: CarouselSlide[] }) {
     }
 
     if (!outgoing) {
-      gsap.set(incoming, { autoAlpha: 1, xPercent: 0, scale: 1 });
+      gsap.set(incoming, { autoAlpha: 1, scale: 1 });
       return;
     }
 
-    /* Shortest way round the loop, so the last-to-first wrap keeps travelling
-       forward instead of rewinding through every slide. */
-    const total = slides.length;
-    const forwardSteps = (index - previous + total) % total;
-    const backwardSteps = (previous - index + total) % total;
-    const forward = forwardSteps <= backwardSteps;
-
+    /* The outgoing slide drifts back as it fades, so the two are never the
+       same size at the same moment — without that the cross-zoom reads as a
+       plain crossfade. */
     gsap.to(outgoing, {
-      xPercent: forward ? -100 : 100,
-      duration: SWIPE_DURATION,
+      autoAlpha: 0,
+      scale: OUT_SCALE,
+      duration: OUT_DURATION,
       ease: "power2.inOut",
       overwrite: "auto",
-      // Parked only once it is off screen, or it would blink out mid-travel.
-      onComplete: () => gsap.set(outgoing, { autoAlpha: 0, xPercent: 0 }),
+      onComplete: () => gsap.set(outgoing, { scale: 1 }),
     });
 
     gsap.fromTo(
       incoming,
-      { xPercent: forward ? 100 : -100, autoAlpha: 1, scale: 1 },
+      { autoAlpha: 0, scale: IN_SCALE },
       {
-        xPercent: 0,
-        duration: SWIPE_DURATION,
-        ease: "power2.inOut",
+        autoAlpha: 1,
+        scale: 1,
+        duration: IN_DURATION,
+        ease: "power2.out",
         overwrite: "auto",
       },
     );
@@ -126,7 +126,7 @@ export function HeroCarouselView({ slides }: { slides: CarouselSlide[] }) {
       style={style}
       // min-h-72 is the pre-measurement fallback; `style` overrides it once
       // the height is known.
-      className="relative min-h-72 w-full overflow-hidden bg-muted"
+      className="relative min-h-72 w-full overflow-hidden bg-background"
     >
       {slides.map((slide, position) => (
         <div

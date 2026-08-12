@@ -20,12 +20,14 @@ export default async function ProductsPage({
 }: {
   searchParams: Promise<{
     category?: string;
+    search?: string;
     sort?: string;
     in_stock?: string;
   }>;
 }) {
   const params = await searchParams;
   const category = params.category?.trim() || undefined;
+  const search = params.search?.trim() || undefined;
   // Ignore a hand-edited sort value rather than sending it to the API.
   const sort = SORTS.includes(params.sort as ProductSort)
     ? (params.sort as ProductSort)
@@ -34,21 +36,28 @@ export default async function ProductsPage({
 
   return (
     <>
+      {/* A search shows what was typed, so the results are obviously a
+          response to it rather than an unexplained subset. */}
       <PageBanner
-        title={category ?? "Our Products"}
+        title={search ? `“${search}”` : (category ?? "Our Products")}
         crumbs={[
           { label: "Home", href: APP_ROUTES.SHOP.HOME },
-          category
+          category || search
             ? { label: "Products", href: APP_ROUTES.SHOP.PRODUCTS }
             : { label: "Products" },
-          ...(category ? [{ label: category }] : []),
+          ...(search
+            ? [{ label: "Search" }]
+            : category
+              ? [{ label: category }]
+              : []),
         ]}
       />
       {/* key: remount when the params change so the grid re-seeds from them. */}
       <ProductGrid
-        key={`${category ?? ""}|${sort}|${inStock}`}
+        key={`${category ?? ""}|${search ?? ""}|${sort}|${inStock}`}
         initialFilters={{
           category,
+          search,
           sort,
           in_stock: inStock || undefined,
         }}

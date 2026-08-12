@@ -7,14 +7,21 @@ import * as React from "react";
 import { toast } from "sonner";
 
 import { AddressList } from "@/components/address/address-list";
+import {
+  OrderFailedDialog,
+  type FailureKind,
+} from "@/components/checkout/order-failed-dialog";
+import { OrderPlacedDialog } from "@/components/checkout/order-placed-dialog";
 import { SweepButton } from "@/components/ui/sweep-button";
 import { APP_ROUTES } from "@/constants/routes";
 import { useAddresses } from "@/hooks/use-addresses";
 import { useCart } from "@/hooks/use-cart";
+import { useCheckout, type CheckoutFailure } from "@/hooks/use-checkout";
 import { useCustomerSession } from "@/hooks/use-customer-session";
 import { formatPrice } from "@/lib/product";
 import { cn } from "@/lib/utils";
 import { useAuthDialogStore } from "@/store/auth-dialog.store";
+import type { Order } from "@/types/customer.order.types";
 
 export function CheckoutView() {
   const router = useRouter();
@@ -34,6 +41,12 @@ export function CheckoutView() {
     remove,
   } = useAddresses();
 
+  const [placed, setPlaced] = React.useState<Order | null>(null);
+  const [failure, setFailure] = React.useState<CheckoutFailure | null>(null);
+  const { pay, isPaying } = useCheckout({
+    onPlaced: setPlaced,
+    onFailed: setFailure,
+  });
   const [selectedId, setSelectedId] = React.useState<number | null>(null);
 
   // The default is the selection until the shopper says otherwise. Deriving
@@ -53,9 +66,7 @@ export function CheckoutView() {
       toast.error("Add a delivery address to continue.");
       return;
     }
-    toast.info("Order placement is coming soon.", {
-      description: `Delivering to ${selected.full_name}, ${selected.city}.`,
-    });
+    void pay(selected.id);
   }
 
   if (isSessionLoading || !isHydrated) {
@@ -91,7 +102,7 @@ export function CheckoutView() {
     );
   }
 
-  if (items.length === 0) {
+  if (items.length === 0 && !placed) {
     return (
       <div className="flex flex-col items-center gap-4 py-20 text-center">
         <span className="flex size-16 items-center justify-center rounded-full bg-primary/10">
@@ -194,12 +205,12 @@ export function CheckoutView() {
 
         <div className="mt-6 flex flex-col gap-2">
           <SweepButton
-            label="Place Order"
+            label={isPaying ? "Opening payment…" : "Place Order"}
             color="sidebar"
             variant="filled"
             className={cn(
               "w-full",
-              !selected && "pointer-events-none opacity-50",
+              (!selected || isPaying) && "pointer-events-none opacity-50",
             )}
             onClick={handlePlaceOrder}
           />
@@ -218,6 +229,35 @@ export function CheckoutView() {
           </p>
         ) : null}
       </section>
+
+      {failure ? (
+        <OrderFailedDialog
+          kind={failure.kind as FailureKind}
+          orderNumber={failure.orderNumber}
+          reason={failure.reason}
+          open
+          onRetry={() => {
+            setFailure(null);
+            if (selected) void pay(selected.id);
+          }}
+          // The cart survives a failure, so closing leaves them on checkout
+          // rather than pushing them away from a retry.
+          onClose={() => setFailure(null)}
+        />
+      ) : null}
+
+      {placed ? (
+        <OrderPlacedDialog
+          order={placed}
+          open
+          // Checkout is empty behind it now, so closing leaves rather than
+          // dropping them on a "nothing to check out" page.
+          onClose={() => {
+            setPlaced(null);
+            router.push(APP_ROUTES.SHOP.PRODUCTS);
+          }}
+        />
+      ) : null}
     </div>
   );
 }

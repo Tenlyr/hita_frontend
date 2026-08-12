@@ -1,11 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { CartLink, WishlistLink } from "@/components/layout/footer-shop-links";
 import { NewsletterForm } from "@/components/layout/newsletter-form";
 import { BrandIcon, type BrandNetwork } from "@/components/ui/brand-icon";
 import { APP_ROUTES } from "@/constants/routes";
 
 const { SHOP } = APP_ROUTES;
+
+const LINK_CLASS = "text-white/75 transition-colors hover:text-primary";
 
 const LINK_COLUMNS: {
   title: string;
@@ -27,13 +30,6 @@ const LINK_COLUMNS: {
     ],
   },
   {
-    title: "Shop",
-    links: [
-      { label: "Cart", href: SHOP.CART },
-      { label: "Wishlist", href: SHOP.WISHLIST },
-    ],
-  },
-  {
     title: "Customer Service",
     links: [
       { label: "FAQs", href: SHOP.FAQ },
@@ -48,6 +44,24 @@ const SOCIALS: { network: BrandNetwork; href: string; label: string }[] = [
   { network: "instagram", href: "https://instagram.com", label: "Instagram" },
 ];
 
+/** Both are actions rather than links: the cart opens its drawer, and the
+    wishlist needs an account behind it. */
+function ShopColumn() {
+  return (
+    <div>
+      <h3 className="text-lg font-black text-white sm:text-xl">Shop</h3>
+      <ul className="mt-5 space-y-3">
+        <li>
+          <CartLink className={`${LINK_CLASS} cursor-pointer`} />
+        </li>
+        <li>
+          <WishlistLink className={`${LINK_CLASS} cursor-pointer`} />
+        </li>
+      </ul>
+    </div>
+  );
+}
+
 function LinkColumn({ title, links }: (typeof LINK_COLUMNS)[number]) {
   return (
     <div>
@@ -55,10 +69,7 @@ function LinkColumn({ title, links }: (typeof LINK_COLUMNS)[number]) {
       <ul className="mt-5 space-y-3">
         {links.map((link) => (
           <li key={link.label}>
-            <Link
-              href={link.href}
-              className="text-white/75 transition-colors hover:text-primary"
-            >
+            <Link href={link.href} className={LINK_CLASS}>
               {link.label}
             </Link>
           </li>
@@ -69,7 +80,7 @@ function LinkColumn({ title, links }: (typeof LINK_COLUMNS)[number]) {
 }
 
 export function SiteFooter() {
-  const [sitemap, others, shop, service] = LINK_COLUMNS;
+  const [sitemap, others, service] = LINK_COLUMNS;
 
   return (
     <footer className="relative isolate mt-auto overflow-hidden">
@@ -138,7 +149,7 @@ export function SiteFooter() {
             <LinkColumn {...others} />
           </div>
           <div className="order-4 lg:order-4 lg:text-center">
-            <LinkColumn {...shop} />
+            <ShopColumn />
           </div>
           <div className="order-5 lg:order-5">
             <LinkColumn {...service} />

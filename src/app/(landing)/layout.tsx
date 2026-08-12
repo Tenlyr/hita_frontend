@@ -21,11 +21,12 @@ export default function LandingLayout({
       <CustomerAuthDialog />
       <CartSheet />
 
-      {/* The storefront had no Toaster at all, so every toast the wishlist,
-          cart, login and contact form fired went nowhere. Bottom-right keeps
-          it clear of the sticky header. */}
+      {/* Bottom-right keeps it clear of the sticky header. Sonner defaults to
+          4s, which is long for confirmations the shopper has already watched
+          happen — the heart filling, the cart badge moving. */}
       <Toaster
         position="bottom-right"
+        duration={2500}
         className={`${josefinSans.variable} font-sans`}
       />
     </div>

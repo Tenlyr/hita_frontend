@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import * as React from "react";
 
+import { SearchDialog } from "@/components/layout/search-dialog";
 import { APP_ROUTES } from "@/constants/routes";
 import { useCart } from "@/hooks/use-cart";
 import { hasCustomerSession } from "@/lib/auth";
@@ -28,6 +29,7 @@ export function SiteHeader() {
   const openAuthDialog = useAuthDialogStore((state) => state.open);
   const { count, isHydrated } = useCart();
   const [menuOpen, setMenuOpen] = React.useState(false);
+  const [searchOpen, setSearchOpen] = React.useState(false);
 
   function handleAccount() {
     setMenuOpen(false);
@@ -86,6 +88,7 @@ export function SiteHeader() {
           <button
             type="button"
             aria-label="Search"
+            onClick={() => setSearchOpen(true)}
             className="cursor-pointer transition-opacity hover:opacity-70"
           >
             <Image
@@ -146,6 +149,8 @@ export function SiteHeader() {
           </button>
         </div>
       </div>
+
+      <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
 
       {menuOpen ? (
         <>

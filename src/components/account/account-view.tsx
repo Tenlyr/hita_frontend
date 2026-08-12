@@ -1,11 +1,12 @@
 "use client";
 
-import { Heart, LogOut, MapPin, UserRound } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Heart, LogOut, MapPin, Package, UserRound } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
 import { toast } from "sonner";
 
 import { AddressPanel } from "@/components/account/address-panel";
+import { OrdersPanel } from "@/components/account/orders-panel";
 import { WishlistPanel } from "@/components/account/wishlist-panel";
 import {
   AlertDialog,
@@ -24,9 +25,10 @@ import { josefinSans } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 import { useAuthDialogStore } from "@/store/auth-dialog.store";
 
-type Tab = "addresses" | "wishlist";
+type Tab = "orders" | "addresses" | "wishlist";
 
 const TABS = [
+  { id: "orders", label: "Orders", icon: Package },
   { id: "addresses", label: "Addresses", icon: MapPin },
   { id: "wishlist", label: "Wishlist", icon: Heart },
 ] as const satisfies ReadonlyArray<{
@@ -41,7 +43,13 @@ export function AccountView() {
   const openAuthDialog = useAuthDialogStore((state) => state.open);
   const [confirmOpen, setConfirmOpen] = React.useState(false);
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
-  const [tab, setTab] = React.useState<Tab>("addresses");
+  // `?tab=` lets the footer link straight to a panel. Orders leads otherwise:
+  // it is the reason most people open an account page.
+  const searchParams = useSearchParams();
+  const requested = searchParams.get("tab");
+  const [tab, setTab] = React.useState<Tab>(
+    TABS.some((item) => item.id === requested) ? (requested as Tab) : "orders",
+  );
 
   async function handleLogout() {
     setIsLoggingOut(true);
@@ -116,18 +124,36 @@ export function AccountView() {
         </button>
       </nav>
 
-      {/* Both panels share a min height so switching tabs doesn't jump the
-          page under the cursor. */}
-      {tab === "addresses" ? (
-        <section className="min-h-[420px]">
-          <AddressPanel user={user} />
-        </section>
-      ) : (
-        <section className="min-h-[420px]">
-          <h2 className="mb-6 text-xl font-black text-secondary">Wishlist</h2>
-          <WishlistPanel />
-        </section>
-      )}
+      {/* The panel scrolls inside a bounded box from lg up, so a long orders
+          list does not stretch the page and push the nav out of reach. Below
+          lg it is left alone — nesting a scroller inside a scrolling page on a
+          phone is worse than a long page. */}
+      <section className="flex min-h-[300px] flex-col lg:max-h-[calc(100vh-12rem)]">
+        {tab === "orders" ? (
+          <>
+            <h2 className="mb-6 shrink-0 text-xl font-black text-secondary">
+              Your orders
+            </h2>
+            <div className="min-h-0 flex-1 lg:overflow-y-auto lg:pr-2">
+              <OrdersPanel />
+            </div>
+          </>
+        ) : tab === "addresses" ? (
+          // AddressPanel brings its own heading and Add button.
+          <div className="min-h-0 flex-1 lg:overflow-y-auto lg:pr-2">
+            <AddressPanel user={user} />
+          </div>
+        ) : (
+          <>
+            <h2 className="mb-6 shrink-0 text-xl font-black text-secondary">
+              Wishlist
+            </h2>
+            <div className="min-h-0 flex-1 lg:overflow-y-auto lg:pr-2">
+              <WishlistPanel />
+            </div>
+          </>
+        )}
+      </section>
 
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <AlertDialogContent

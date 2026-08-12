@@ -1,5 +1,9 @@
-import { PagePlaceholder } from "@/components/layout/page-placeholder";
+import { OrdersBoard } from "@/components/orders/orders-board";
 
 export default function OrdersPage() {
-  return <PagePlaceholder title="Orders" />;
+  return (
+    <div className="w-full">
+      <OrdersBoard />
+    </div>
+  );
 }
