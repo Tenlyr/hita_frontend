@@ -2,6 +2,7 @@
 
 import {
   ChevronRight,
+  FileText,
   GalleryHorizontalEnd,
   Inbox,
   House,
@@ -51,6 +52,7 @@ const NAV_ITEMS = [
   },
   { label: "Inventory", href: APP_ROUTES.APP.INVENTORY, icon: Package },
   { label: "Orders", href: APP_ROUTES.APP.ORDERS, icon: Truck },
+  { label: "Invoices", href: APP_ROUTES.APP.INVOICES, icon: FileText },
   { label: "Messages", href: APP_ROUTES.APP.MESSAGES, icon: Inbox },
 ];
 

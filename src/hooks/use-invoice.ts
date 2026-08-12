@@ -18,7 +18,9 @@ export function useInvoice() {
         const blob = await orderService.invoice(orderId);
         saveBlob(blob, `invoice-${orderNumber}.pdf`);
       } catch (error) {
-        toast.error(getApiErrorMessage(error, "Could not download the invoice."));
+        toast.error(
+          getApiErrorMessage(error, "Could not download the invoice."),
+        );
       } finally {
         setDownloadingId(null);
       }

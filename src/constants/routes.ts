@@ -25,6 +25,7 @@ export const APP_ROUTES = {
     INVENTORY: "/dashboard/inventory",
     MESSAGES: "/dashboard/messages",
     ORDERS: "/dashboard/orders",
+    INVOICES: "/dashboard/invoices",
   },
   ADMIN: {
     LOGIN: "/dashboard/login",
