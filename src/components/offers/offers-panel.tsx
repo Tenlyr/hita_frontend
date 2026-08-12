@@ -67,7 +67,7 @@ export function OffersPanel() {
   return (
     <div className="space-y-4 p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="relative flex-1">
+        <div className="relative flex-1 sm:min-w-64">
           <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={search}

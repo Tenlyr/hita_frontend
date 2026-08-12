@@ -122,7 +122,7 @@ export function OrdersBoard() {
             three stacked cards made them read as three unrelated ones. */}
         <div className="space-y-3 border-b border-border p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <div className="relative flex-1">
+            <div className="relative flex-1 sm:min-w-72">
               <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={search}
@@ -146,6 +146,7 @@ export function OrdersBoard() {
               value={status}
               onChange={(event) => setStatus(event.target.value)}
               aria-label="Filter by status"
+              wrapperClassName="sm:w-48"
             >
               <option value="">All statuses</option>
               {ORDER_STATUSES.map((option) => (
@@ -159,6 +160,7 @@ export function OrdersBoard() {
               value={paymentStatus}
               onChange={(event) => setPaymentStatus(event.target.value)}
               aria-label="Filter by payment"
+              wrapperClassName="sm:w-44"
             >
               {PAYMENT_FILTERS.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -175,6 +177,7 @@ export function OrdersBoard() {
                 choosePreset(event.target.value as DatePreset)
               }
               aria-label="Date range"
+              wrapperClassName="sm:w-44"
             >
               {DATE_PRESETS.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -246,9 +249,10 @@ export function OrdersBoard() {
         {/* The table scrolls sideways rather than squeezing eight columns into
             a phone — a squashed order number helps nobody. */}
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[56rem] border-collapse text-sm">
+          <table className="w-full min-w-[60rem] border-collapse text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/50 text-left">
+                <th className="p-3 text-center font-bold text-secondary">#</th>
                 <th className="p-3 font-bold text-secondary">Order</th>
                 <th className="p-3 font-bold text-secondary">Customer</th>
                 <th className="p-3 font-bold text-secondary">Date</th>
@@ -277,14 +281,14 @@ export function OrdersBoard() {
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, index) => (
                   <tr key={index} className="border-b border-border">
-                    <td colSpan={9} className="p-3">
+                    <td colSpan={10} className="p-3">
                       <div className="h-6 animate-pulse rounded bg-muted" />
                     </td>
                   </tr>
                 ))
               ) : orders.length === 0 ? (
                 <tr>
-                  <td colSpan={9}>
+                  <td colSpan={10}>
                     <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
                       <span className="flex size-12 items-center justify-center rounded-full bg-primary/10">
                         <Package className="size-5 text-primary" />
@@ -298,11 +302,16 @@ export function OrdersBoard() {
                   </td>
                 </tr>
               ) : (
-                orders.map((order) => (
+                orders.map((order, index) => (
                   <tr
                     key={order.id}
                     className="border-b border-border bg-background last:border-b-0 hover:bg-muted/40"
                   >
+                    {/* Continuous across pages: page two starts at 21, not 1,
+                        so a row can be referred to by number over the phone. */}
+                    <td className="p-3 text-center text-muted-foreground tabular-nums">
+                      {(page - 1) * pageSize + index + 1}
+                    </td>
                     <td className="p-3 font-medium whitespace-nowrap text-secondary">
                       {order.order_number}
                     </td>

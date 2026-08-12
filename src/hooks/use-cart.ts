@@ -41,7 +41,8 @@ export function useCart() {
     async (product: Product, variant: ProductVariant, quantity = 1) => {
       try {
         await addToStore(product, variant, quantity);
-        toast.success(`${product.product_name ?? "Product"} added to cart`);
+        // No success toast: the sheet opens with the line in it, which says
+        // the same thing and shows the cart at the same time.
         openSheet();
       } catch (error) {
         toast.error(

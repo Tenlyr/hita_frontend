@@ -108,7 +108,7 @@ export function InvoicesBoard() {
       {/* Filters, table and pagination are one panel: they are one tool. */}
       <div className="border border-border bg-background">
         <div className="flex flex-col gap-3 border-b border-border p-4 sm:flex-row sm:items-center">
-          <div className="relative flex-1">
+          <div className="relative flex-1 sm:min-w-72">
             <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
