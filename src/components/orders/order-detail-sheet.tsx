@@ -1,6 +1,6 @@
 "use client";
 
-import { Download, ImageOff, MapPin, Phone, User } from "lucide-react";
+import { Download, ImageOff, MapPin, Phone, Printer, User } from "lucide-react";
 import Image from "next/image";
 import * as React from "react";
 
@@ -17,7 +17,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { getApiErrorMessage } from "@/lib/api-error";
-import { saveBlob } from "@/lib/download";
+import { printBlob, saveBlob } from "@/lib/download";
 import { formatPrice } from "@/lib/product";
 import { adminOrderService } from "@/services/order.service";
 import type { AdminOrder } from "@/types/admin.order.types";
@@ -85,18 +85,27 @@ export function OrderDetailSheet({
     };
   }, [orderId]);
 
-  async function downloadInvoice() {
+  /** One fetch, two destinations — printing and saving the same bytes. */
+  async function withInvoice(handle: (blob: Blob) => void, failure: string) {
     if (!order) return;
     setIsDownloading(true);
     try {
-      const blob = await adminOrderService.invoice(order.id);
-      saveBlob(blob, `invoice-${order.order_number}.pdf`);
+      handle(await adminOrderService.invoice(order.id));
     } catch (error) {
-      toast.error(getApiErrorMessage(error, "Could not download the invoice."));
+      toast.error(getApiErrorMessage(error, failure));
     } finally {
       setIsDownloading(false);
     }
   }
+
+  const printInvoice = () =>
+    withInvoice(printBlob, "Could not open the invoice.");
+
+  const downloadInvoice = () =>
+    withInvoice(
+      (blob) => saveBlob(blob, `invoice-${order?.order_number}.pdf`),
+      "Could not download the invoice.",
+    );
 
   return (
     <Sheet open={orderId !== null} onOpenChange={onOpenChange}>
@@ -153,7 +162,26 @@ export function OrderDetailSheet({
                       <p className="text-xs text-muted-foreground">
                         {item.size ? `${item.size} · ` : ""}
                         {formatPrice(item.unit_price)} × {item.quantity}
+                        {item.original_price ? (
+                          <span className="ml-1.5 line-through">
+                            {formatPrice(item.original_price)}
+                          </span>
+                        ) : null}
                       </p>
+                      {/* Named, not just badged: "10% OFF" does not say which
+                          offer it was, and offers get edited later. */}
+                      {item.offer_label ? (
+                        <p className="mt-0.5 text-xs">
+                          <span className="bg-primary/10 px-1.5 py-0.5 font-bold text-primary">
+                            {item.offer_label}
+                          </span>
+                          {item.offer_title ? (
+                            <span className="ml-1.5 text-muted-foreground">
+                              {item.offer_title}
+                            </span>
+                          ) : null}
+                        </p>
+                      ) : null}
                     </div>
                     <span className="text-sm text-secondary">
                       {formatPrice(item.line_total)}
@@ -163,7 +191,29 @@ export function OrderDetailSheet({
               </ul>
 
               <div className="mt-3">
+                {/* Offers are already inside the subtotal — shown so the desk
+                    can answer "why is this cheaper than the listed price?". */}
+                {Number(order.offer_savings) > 0 ? (
+                  <Row label="Offer savings">
+                    <span className="text-primary">
+                      −{formatPrice(order.offer_savings)}
+                    </span>
+                  </Row>
+                ) : null}
                 <Row label="Subtotal">{formatPrice(order.subtotal)}</Row>
+                {Number(order.discount) > 0 ? (
+                  <Row
+                    label={
+                      order.coupon_code
+                        ? `Coupon ${order.coupon_code}`
+                        : "Discount"
+                    }
+                  >
+                    <span className="text-primary">
+                      −{formatPrice(order.discount)}
+                    </span>
+                  </Row>
+                ) : null}
                 <Row label="Shipping">
                   {Number(order.shipping) ? (
                     formatPrice(order.shipping)
@@ -237,16 +287,28 @@ export function OrderDetailSheet({
             </section>
 
             {order.payment_status === "paid" ? (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => void downloadInvoice()}
-                disabled={isDownloading}
-                className="h-10 w-full cursor-pointer gap-2 rounded-none"
-              >
-                <Download className="size-4" />
-                {isDownloading ? "Preparing…" : "Download invoice"}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  onClick={() => void printInvoice()}
+                  disabled={isDownloading}
+                  className="h-10 flex-1 cursor-pointer gap-2 rounded-none bg-sidebar text-sidebar-foreground hover:bg-sidebar/90"
+                >
+                  <Printer className="size-4" />
+                  {isDownloading ? "Preparing…" : "Print invoice"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => void downloadInvoice()}
+                  disabled={isDownloading}
+                  aria-label="Download invoice"
+                  title="Download invoice"
+                  className="h-10 w-11 shrink-0 cursor-pointer rounded-none"
+                >
+                  <Download className="size-4" />
+                </Button>
+              </div>
             ) : null}
           </div>
         )}

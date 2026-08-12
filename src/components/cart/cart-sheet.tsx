@@ -86,6 +86,19 @@ function CartRow({
           </button>
         </div>
 
+        {line.offer ? (
+          <p className="flex items-center gap-2 text-xs">
+            <span className="bg-primary/10 px-1.5 py-0.5 font-bold text-primary">
+              {line.offer}
+            </span>
+            {line.original_price ? (
+              <span className="text-muted-foreground line-through">
+                {formatPrice(line.original_price)}
+              </span>
+            ) : null}
+          </p>
+        ) : null}
+
         <div className="flex items-center justify-between gap-2">
           <QuantityStepper
             value={line.quantity}

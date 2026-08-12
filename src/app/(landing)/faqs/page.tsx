@@ -1,12 +1,16 @@
+import type { Metadata } from "next";
+
+import { pageMetadata } from "@/lib/metadata";
 import { FaqAccordion } from "@/components/faq/faq-accordion";
 import { PageBanner } from "@/components/layout/page-banner";
 import { APP_ROUTES } from "@/constants/routes";
 
-export const metadata = {
-  title: "FAQs — Hitadecor",
+export const metadata: Metadata = pageMetadata({
+  title: "FAQs",
   description:
-    "Shipping, payment, returns and where to find us — the questions we're asked most.",
-};
+    "Shipping, payment, returns and where to find us — the questions Hitadecor shoppers ask most, answered.",
+  path: "/faqs",
+});
 
 export default function FaqsPage() {
   return (

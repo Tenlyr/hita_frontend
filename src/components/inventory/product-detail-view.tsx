@@ -306,7 +306,16 @@ export function ProductDetailView({ productId }: { productId: number | null }) {
                         <tr key={variant.id} className="border-t border-border">
                           <td className="px-3 py-2">{variant.size ?? "—"}</td>
                           <td className="px-3 py-2 font-medium">
-                            {formatPrice(variant.price)}
+                            {variant.offer_price ? (
+                              <span className="flex flex-wrap items-baseline gap-x-2">
+                                <span>{formatPrice(variant.offer_price)}</span>
+                                <span className="text-xs font-normal text-muted-foreground line-through">
+                                  {formatPrice(variant.price)}
+                                </span>
+                              </span>
+                            ) : (
+                              formatPrice(variant.price)
+                            )}
                           </td>
                           <td
                             className={cn(

@@ -4,6 +4,7 @@ import * as React from "react";
 import { toast } from "sonner";
 
 import { getApiErrorMessage } from "@/lib/api-error";
+import { printBlob, saveBlob } from "@/lib/download";
 import { adminOrderService } from "@/services/order.service";
 import type {
   AdminOrder,
@@ -144,8 +145,53 @@ export function useAdminOrders() {
     setPage(1);
   }, []);
 
+  // Only paid orders have a receipt — the API refuses one for an unpaid
+  // order, so the button says so before the round trip.
+  const [receiptId, setReceiptId] = React.useState<number | null>(null);
+
+  const withReceipt = React.useCallback(
+    async (
+      order: AdminOrder,
+      handle: (blob: Blob) => void,
+      failure: string,
+    ) => {
+      if (order.payment_status !== "paid") {
+        toast.error("No invoice until the payment is confirmed.");
+        return;
+      }
+      setReceiptId(order.id);
+      try {
+        handle(await adminOrderService.invoice(order.id));
+      } catch (err) {
+        toast.error(getApiErrorMessage(err, failure));
+      } finally {
+        setReceiptId(null);
+      }
+    },
+    [],
+  );
+
+  const printInvoice = React.useCallback(
+    (order: AdminOrder) =>
+      withReceipt(order, printBlob, "Could not open that invoice."),
+    [withReceipt],
+  );
+
+  const downloadInvoice = React.useCallback(
+    (order: AdminOrder) =>
+      withReceipt(
+        order,
+        (blob) => saveBlob(blob, `invoice-${order.order_number}.pdf`),
+        "Could not download that invoice.",
+      ),
+    [withReceipt],
+  );
+
   return {
     orders: data.results,
+    receiptId,
+    printInvoice,
+    downloadInvoice,
     stats: data.stats,
     count: data.count,
     page: data.page,

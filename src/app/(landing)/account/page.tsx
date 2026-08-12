@@ -1,12 +1,18 @@
+import type { Metadata } from "next";
+
 import { Suspense } from "react";
 
+import { pageMetadata } from "@/lib/metadata";
 import { AccountView } from "@/components/account/account-view";
 import { PageBanner } from "@/components/layout/page-banner";
 import { APP_ROUTES } from "@/constants/routes";
 
-export const metadata = {
-  title: "My Account — Hitadecor",
-};
+export const metadata: Metadata = pageMetadata({
+  title: "My Account",
+  description: "Your Hitadecor orders, saved addresses and wishlist.",
+  path: "/account",
+  noIndex: true,
+});
 
 export default function AccountPage() {
   return (

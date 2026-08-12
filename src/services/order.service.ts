@@ -13,9 +13,11 @@ import type {
 
 export const orderService = {
   /** POST /orders — snapshots the cart and opens a Razorpay order. */
-  async create(addressId: number): Promise<CreateOrderResult> {
+  async create(addressId: number, couponCode = ""): Promise<CreateOrderResult> {
     const { data } = await api.post<ApiResponse<CreateOrderResult>>("/orders", {
       address_id: addressId,
+      // Revalidated server-side; this only says which code was shown.
+      coupon_code: couponCode,
     });
     return data.data;
   },
@@ -90,6 +92,7 @@ export const adminOrderService = {
     return data.data;
   },
 
+  /** GET /admin/orders/{id}/invoice — the receipt PDF, for print or save. */
   async invoice(orderId: number): Promise<Blob> {
     const { data } = await api.get<Blob>(`/admin/orders/${orderId}/invoice`, {
       responseType: "blob",

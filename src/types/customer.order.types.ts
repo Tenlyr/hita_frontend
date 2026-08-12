@@ -18,6 +18,11 @@ export interface OrderItem {
   size: string;
   image: string | null;
   unit_price: string;
+  /** Which offer discounted this line, snapshotted at checkout. */
+  offer_title: string;
+  offer_label: string;
+  /** The listed price before that offer, or null when none applied. */
+  original_price: string | null;
   quantity: number;
   line_total: string;
 }
@@ -38,6 +43,11 @@ export interface Order {
   status: OrderStatus;
   payment_status: PaymentStatus;
   subtotal: string;
+  /** Coupon typed at checkout, and what it took off. */
+  coupon_code: string;
+  discount: string;
+  /** What the offers took off, before any coupon. */
+  offer_savings: string;
   shipping: string;
   total: string;
   address: OrderAddress;

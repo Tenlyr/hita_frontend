@@ -23,13 +23,33 @@ function formatPrice(value: string | null): string | null {
   return `₹${amount.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`;
 }
 
-/** Cheapest variant price — that's the "from" price shoppers expect. */
-function lowestPrice(product: Product): string | null {
-  const prices = product.variants
-    .map((variant) => Number(variant.price))
-    .filter((price) => !Number.isNaN(price) && price > 0);
-  if (prices.length === 0) return null;
-  return formatPrice(String(Math.min(...prices)));
+/**
+ * Cheapest variant — that's the "from" price shoppers expect.
+ *
+ * Chosen on what is actually payable, so a discounted variant can become the
+ * cheapest one. The listed price rides along to be struck through.
+ */
+function lowestPrice(product: Product): {
+  price: string | null;
+  wasPrice: string | null;
+} {
+  let best: { payable: number; listed: number } | null = null;
+
+  for (const variant of product.variants) {
+    const listed = Number(variant.price);
+    if (Number.isNaN(listed) || listed <= 0) continue;
+    const offered = Number(variant.offer_price);
+    const payable =
+      variant.offer_price && !Number.isNaN(offered) ? offered : listed;
+    if (!best || payable < best.payable) best = { payable, listed };
+  }
+
+  if (!best) return { price: null, wasPrice: null };
+  return {
+    price: formatPrice(String(best.payable)),
+    wasPrice:
+      best.payable !== best.listed ? formatPrice(String(best.listed)) : null,
+  };
 }
 
 function totalStock(product: Product): number {
@@ -47,7 +67,7 @@ export function ProductCard({ product }: { product: Product }) {
   // Only ever show an offer that actually exists — no "None% off".
   const offer =
     product.variants.find((variant) => variant.offer)?.offer ?? null;
-  const price = lowestPrice(product);
+  const { price, wasPrice } = lowestPrice(product);
   const stock = totalStock(product);
 
   function step(direction: 1 | -1) {
@@ -163,7 +183,17 @@ export function ProductCard({ product }: { product: Product }) {
         <div className="mt-auto flex items-end justify-between gap-2 pt-3">
           <div>
             {price ? (
-              <p className="text-lg font-black text-secondary">{price}</p>
+              <p className="flex flex-wrap items-baseline gap-x-2">
+                <span className="text-lg font-black text-secondary">
+                  {price}
+                </span>
+                {/* Only ever shown when an offer actually moved the price. */}
+                {wasPrice ? (
+                  <span className="text-sm text-muted-foreground line-through">
+                    {wasPrice}
+                  </span>
+                ) : null}
+              </p>
             ) : (
               <p className="text-sm text-muted-foreground">Price not set</p>
             )}

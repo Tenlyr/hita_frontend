@@ -2,6 +2,7 @@
 
 import {
   Download,
+  Printer,
   FileText,
   Pencil,
   Plus,
@@ -60,6 +61,7 @@ export function InvoicesBoard() {
     setPage,
     downloadingId,
     download,
+    printInvoice,
     remove,
   } = useInvoices();
 
@@ -157,7 +159,7 @@ export function InvoicesBoard() {
               id="invoice-page-size"
               value={pageSize}
               onChange={(event) => setPageSize(Number(event.target.value))}
-              className="w-24"
+              wrapperClassName="w-24"
             >
               {PAGE_SIZES.map((size) => (
                 <option key={size} value={size}>
@@ -244,6 +246,16 @@ export function InvoicesBoard() {
                     </td>
                     <td className="p-3">
                       <div className="flex items-center justify-end gap-1">
+                        <button
+                          type="button"
+                          onClick={() => void printInvoice(invoice)}
+                          disabled={downloadingId === invoice.id}
+                          aria-label={`Print ${invoice.invoice_number}`}
+                          title="Print"
+                          className="cursor-pointer p-2 text-muted-foreground transition-colors hover:text-primary disabled:opacity-40"
+                        >
+                          <Printer className="size-4" />
+                        </button>
                         <button
                           type="button"
                           onClick={() => void download(invoice)}

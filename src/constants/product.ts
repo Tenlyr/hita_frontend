@@ -59,7 +59,6 @@ export const VARIANT_FIELDS = [
     type: "number",
     placeholder: "12.5",
   },
-  { name: "offer", label: "Offer", type: "text", placeholder: "10% OFF" },
 ] as const satisfies ReadonlyArray<{
   name: keyof Omit<ProductVariantDraft, "key">;
   label: string;
@@ -84,6 +83,5 @@ export function emptyVariant(
     width_in_cm: "",
     height_in_cm: "",
     diameter_in_cm: "",
-    offer: "",
   };
 }

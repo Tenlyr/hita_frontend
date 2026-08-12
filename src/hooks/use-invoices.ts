@@ -4,7 +4,7 @@ import * as React from "react";
 import { toast } from "sonner";
 
 import { getApiErrorMessage } from "@/lib/api-error";
-import { saveBlob } from "@/lib/download";
+import { printBlob, saveBlob } from "@/lib/download";
 import { invoiceService } from "@/services/invoice.service";
 import type { Invoice, InvoiceListResult } from "@/types/admin.invoice.types";
 
@@ -72,6 +72,19 @@ export function useInvoices() {
     [],
   );
 
+  const printInvoice = React.useCallback(async (invoice: Invoice) => {
+    // The same bytes the download gives — printing a separate HTML rendering
+    // would put a different document on paper.
+    setDownloadingId(invoice.id);
+    try {
+      printBlob(await invoiceService.pdf(invoice.id));
+    } catch (err) {
+      toast.error(getApiErrorMessage(err, "Could not open the invoice."));
+    } finally {
+      setDownloadingId(null);
+    }
+  }, []);
+
   const download = React.useCallback(async (invoice: Invoice) => {
     setDownloadingId(invoice.id);
     try {
@@ -135,6 +148,7 @@ export function useInvoices() {
     setPage,
     downloadingId,
     download,
+    printInvoice,
     remove,
     refresh,
   };

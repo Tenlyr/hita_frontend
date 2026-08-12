@@ -20,12 +20,12 @@ export const APP_ROUTES = {
     DASHBOARD: "/dashboard",
     PRODUCTS: "/dashboard/products",
     ADD_PRODUCT: "/dashboard/products/new",
-    CATALOG_UPLOAD: "/dashboard/catalog-upload",
     CAROUSEL: "/dashboard/carousel",
     INVENTORY: "/dashboard/inventory",
     MESSAGES: "/dashboard/messages",
     ORDERS: "/dashboard/orders",
     INVOICES: "/dashboard/invoices",
+    OFFERS: "/dashboard/offers",
   },
   ADMIN: {
     LOGIN: "/dashboard/login",

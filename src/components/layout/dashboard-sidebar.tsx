@@ -9,8 +9,8 @@ import {
   LogOut,
   Package,
   ShoppingCart,
+  TicketPercent,
   Truck,
-  Upload,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -41,11 +41,6 @@ const NAV_ITEMS = [
     icon: ShoppingCart,
   },
   {
-    label: "Catalog Upload",
-    href: APP_ROUTES.APP.CATALOG_UPLOAD,
-    icon: Upload,
-  },
-  {
     label: "Carousel",
     href: APP_ROUTES.APP.CAROUSEL,
     icon: GalleryHorizontalEnd,
@@ -53,6 +48,11 @@ const NAV_ITEMS = [
   { label: "Inventory", href: APP_ROUTES.APP.INVENTORY, icon: Package },
   { label: "Orders", href: APP_ROUTES.APP.ORDERS, icon: Truck },
   { label: "Invoices", href: APP_ROUTES.APP.INVOICES, icon: FileText },
+  {
+    label: "Offers & Coupons",
+    href: APP_ROUTES.APP.OFFERS,
+    icon: TicketPercent,
+  },
   { label: "Messages", href: APP_ROUTES.APP.MESSAGES, icon: Inbox },
 ];
 

@@ -441,7 +441,8 @@ export function InvoiceForm({ invoice }: { invoice?: Invoice }) {
                       onChange={(event) =>
                         set("discount_type", event.target.value as DiscountType)
                       }
-                      className="h-11! w-24 shrink-0"
+                      className="h-11!"
+                      wrapperClassName="w-24 shrink-0"
                     >
                       <option value="percent">%</option>
                       <option value="flat">₹ flat</option>

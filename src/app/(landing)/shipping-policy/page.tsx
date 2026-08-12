@@ -1,3 +1,6 @@
+import type { Metadata } from "next";
+
+import { pageMetadata } from "@/lib/metadata";
 import { PageBanner } from "@/components/layout/page-banner";
 import { PolicyDocument } from "@/components/legal/policy-document";
 import { APP_ROUTES } from "@/constants/routes";
@@ -8,11 +11,12 @@ import {
   SHIPPING_RULE_TITLE,
 } from "@/constants/shipping";
 
-export const metadata = {
-  title: "Shipping Policy — Hitadecor",
+export const metadata: Metadata = pageMetadata({
+  title: "Shipping Policy",
   description:
-    "Where we ship, how long orders take, tracking, and what to do about damaged or missing items.",
-};
+    "Where Hitadecor ships, how long orders take, tracking, and what to do about damaged or missing items.",
+  path: "/shipping-policy",
+});
 
 export default function ShippingPolicyPage() {
   return (

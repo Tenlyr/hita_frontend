@@ -102,7 +102,7 @@ export function VariantPickerDialog({
                   {product.product_name ?? "Untitled product"}
                 </p>
                 <p className="text-lg font-medium text-primary">
-                  {formatPrice(active?.price)}
+                  {formatPrice(active?.offer_price ?? active?.price)}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {stock > 0 ? `${stock} in stock` : "Out of stock"}

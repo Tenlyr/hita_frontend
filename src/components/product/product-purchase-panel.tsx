@@ -97,9 +97,23 @@ export function ProductPurchasePanel({
           {product.product_name ?? "Untitled product"}
         </h1>
         <StarRating value={product.rating} />
-        <p className="text-2xl font-medium text-primary">
-          {formatPrice(selected?.price ?? null)}
-        </p>
+        {/* The offered price leads; the listed one is struck through beside
+            it, so the reduction is visible on the variant it applies to. */}
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <p className="text-2xl font-medium text-primary">
+            {formatPrice(selected?.offer_price ?? selected?.price ?? null)}
+          </p>
+          {selected?.offer_price ? (
+            <p className="text-lg text-muted-foreground line-through">
+              {formatPrice(selected.price)}
+            </p>
+          ) : null}
+          {selected?.offer ? (
+            <span className="bg-primary/10 px-2 py-1 text-xs font-bold text-primary">
+              {selected.offer}
+            </span>
+          ) : null}
+        </div>
       </div>
 
       {/* Size sits above the cart controls on purpose: price, stock and the

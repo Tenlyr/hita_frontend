@@ -14,15 +14,36 @@ import { cn } from "@/lib/utils";
 import { useCart } from "@/hooks/use-cart";
 import { useWishlist } from "@/hooks/use-wishlist";
 
-/** Cheapest variant price — the "from" price shoppers expect to see. */
-function lowestPrice(product: Product): string | null {
-  const prices = product.variants
-    .map((variant) => Number(variant.price))
-    .filter((price) => !Number.isNaN(price) && price > 0);
-  if (prices.length === 0) return null;
-  return `₹ ${Math.min(...prices).toLocaleString("en-IN", {
-    minimumFractionDigits: 2,
-  })}`;
+function rupees(value: number): string {
+  return `₹ ${value.toLocaleString("en-IN", { minimumFractionDigits: 2 })}`;
+}
+
+/**
+ * Cheapest variant — the "from" price shoppers expect to see.
+ *
+ * Compared on what is actually payable, so a discounted variant can become
+ * the cheapest. The listed price rides along to be struck through.
+ */
+function lowestPrice(product: Product): {
+  price: string | null;
+  wasPrice: string | null;
+} {
+  let best: { payable: number; listed: number } | null = null;
+
+  for (const variant of product.variants) {
+    const listed = Number(variant.price);
+    if (Number.isNaN(listed) || listed <= 0) continue;
+    const offered = Number(variant.offer_price);
+    const payable =
+      variant.offer_price && !Number.isNaN(offered) ? offered : listed;
+    if (!best || payable < best.payable) best = { payable, listed };
+  }
+
+  if (!best) return { price: null, wasPrice: null };
+  return {
+    price: rupees(best.payable),
+    wasPrice: best.payable !== best.listed ? rupees(best.listed) : null,
+  };
 }
 
 interface ProductCardProps {
@@ -45,7 +66,7 @@ export function ProductCard({
   className,
 }: ProductCardProps) {
   const image = product.images[0]?.product_image;
-  const price = lowestPrice(product);
+  const { price, wasPrice } = lowestPrice(product);
 
   const { isWishlisted: isSaved, toggle } = useWishlist();
   const { add } = useCart();
@@ -144,8 +165,15 @@ export function ProductCard({
       <div className="flex flex-1 flex-col gap-3 pt-4">
         <div className="flex items-center gap-3">
           {price ? (
-            <p className="text-lg font-medium text-secondary sm:text-xl">
-              {price}
+            <p className="flex flex-wrap items-baseline gap-x-2">
+              <span className="text-lg font-medium text-secondary sm:text-xl">
+                {price}
+              </span>
+              {wasPrice ? (
+                <span className="text-sm text-muted-foreground line-through">
+                  {wasPrice}
+                </span>
+              ) : null}
             </p>
           ) : null}
 

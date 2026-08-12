@@ -1,13 +1,17 @@
+import type { Metadata } from "next";
+
+import { pageMetadata } from "@/lib/metadata";
 import { LegalDocument } from "@/components/legal/legal-document";
 import { PageBanner } from "@/components/layout/page-banner";
 import { TERMS_SECTIONS } from "@/constants/legal";
 import { APP_ROUTES } from "@/constants/routes";
 
-export const metadata = {
-  title: "Privacy Policy — Hitadecor",
+export const metadata: Metadata = pageMetadata({
+  title: "Privacy Policy",
   description:
-    "How Hitadecor handles your information, orders, deliveries and returns.",
-};
+    "How Hitadecor collects, uses and protects your information when you shop with us.",
+  path: "/privacy-policy",
+});
 
 export default function PrivacyPolicyPage() {
   return (

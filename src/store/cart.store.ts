@@ -70,7 +70,10 @@ function lineFrom(
   variant: ProductVariant,
   quantity: number,
 ): CartLine {
-  const price = variant.price ?? "0";
+  // A guest line prices itself the same way the server does, or the total
+  // would jump the moment they sign in and the cart merges.
+  const listed = variant.price ?? "0";
+  const price = variant.offer_price ?? listed;
   return {
     variant_id: variant.id,
     product_id: product.id,
@@ -78,6 +81,7 @@ function lineFrom(
     image: product.images[0]?.product_image ?? null,
     size: variant.size,
     offer: variant.offer,
+    original_price: variant.offer_price ? listed : null,
     price,
     quantity,
     line_total: fromPaise(toPaise(price) * quantity),
@@ -172,7 +176,10 @@ export const useCartStore = create<CartState>()(
           // drawer paints from them but the numbers come from the server.
           set({ isSyncing: true });
           try {
-            adopt(await cartService.resolve(toMergeLines(get().items)), "guest");
+            adopt(
+              await cartService.resolve(toMergeLines(get().items)),
+              "guest",
+            );
           } catch {
             set({ isSyncing: false });
           }
@@ -181,7 +188,8 @@ export const useCartStore = create<CartState>()(
         addItem: async (product, variant, quantity = 1) =>
           afterSync(async () => {
             const available = stockOf(variant);
-            if (available === 0) throw new Error("That option is out of stock.");
+            if (available === 0)
+              throw new Error("That option is out of stock.");
 
             // Adding twice should add up, but the wire call still *sets* the
             // final number so a retry can't double the line.
@@ -246,7 +254,9 @@ export const useCartStore = create<CartState>()(
               return;
             }
             set({
-              items: get().items.filter((item) => item.variant_id !== variantId),
+              items: get().items.filter(
+                (item) => item.variant_id !== variantId,
+              ),
             });
           }),
 

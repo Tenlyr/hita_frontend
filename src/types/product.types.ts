@@ -9,7 +9,10 @@ export interface ProductVariant {
   width_in_cm: string | null;
   height_in_cm: string | null;
   diameter_in_cm: string | null;
+  /** Derived from active offers, e.g. "15% OFF" — not stored on the variant. */
   offer: string | null;
+  /** The price after that offer, or null when none applies. */
+  offer_price: string | null;
 }
 
 export interface ProductImage {

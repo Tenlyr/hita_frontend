@@ -1,11 +1,17 @@
+import type { Metadata } from "next";
+
 import type { ProductSort } from "@/types/customer.product.types";
+import { pageMetadata } from "@/lib/metadata";
 import { PageBanner } from "@/components/layout/page-banner";
 import { ProductGrid } from "@/components/product/product-grid";
 import { APP_ROUTES } from "@/constants/routes";
 
-export const metadata = {
-  title: "Our Products — Hitadecor",
-};
+export const metadata: Metadata = pageMetadata({
+  title: "Our Products",
+  description:
+    "Browse the full Hitadecor collection — trays, coasters, baskets, cushion covers and decor pieces, handcrafted and shipped across India.",
+  path: "/products",
+});
 
 const SORTS: ProductSort[] = [
   "latest",

@@ -1,10 +1,16 @@
+import type { Metadata } from "next";
+
+import { pageMetadata } from "@/lib/metadata";
 import { CheckoutView } from "@/components/checkout/checkout-view";
 import { PageBanner } from "@/components/layout/page-banner";
 import { APP_ROUTES } from "@/constants/routes";
 
-export const metadata = {
-  title: "Checkout — Hitadecor",
-};
+export const metadata: Metadata = pageMetadata({
+  title: "Checkout",
+  description: "Complete your Hitadecor order.",
+  path: "/checkout",
+  noIndex: true,
+});
 
 export default function CheckoutPage() {
   return (

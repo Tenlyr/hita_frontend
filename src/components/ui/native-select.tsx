@@ -13,11 +13,16 @@ import { cn } from "@/lib/utils";
  */
 function NativeSelect({
   className,
+  wrapperClassName,
   children,
   ...props
-}: React.ComponentProps<"select">) {
+}: React.ComponentProps<"select"> & { wrapperClassName?: string }) {
   return (
-    <div className="relative inline-flex">
+    // Fills its container by default: an inline-flex wrapper sizes itself to
+    // the widest option, so two selects in a column came out different widths
+    // depending on their content. Constrain via wrapperClassName, not the
+    // select's own class — the select can only fill what the wrapper gives it.
+    <div className={cn("relative inline-flex w-full", wrapperClassName)}>
       <select
         data-slot="native-select"
         className={cn(

@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, Package, Search, X } from "lucide-react";
+import { Eye, Package, Printer, Search, X } from "lucide-react";
 import * as React from "react";
 
 import { OrderDetailSheet } from "@/components/orders/order-detail-sheet";
@@ -69,6 +69,8 @@ export function OrdersBoard() {
     setPageSize,
     setPage,
     setOrderStatus,
+    receiptId,
+    printInvoice,
   } = useAdminOrders();
 
   const [openId, setOpenId] = React.useState<number | null>(null);
@@ -230,7 +232,7 @@ export function OrdersBoard() {
                 id="orders-page-size"
                 value={pageSize}
                 onChange={(event) => setPageSize(Number(event.target.value))}
-                className="w-24"
+                wrapperClassName="w-24"
               >
                 {PAGE_SIZES.map((size) => (
                   <option key={size} value={size}>
@@ -250,15 +252,22 @@ export function OrdersBoard() {
                 <th className="p-3 font-bold text-secondary">Order</th>
                 <th className="p-3 font-bold text-secondary">Customer</th>
                 <th className="p-3 font-bold text-secondary">Date</th>
-                <th className="p-3 text-right font-bold text-secondary">
+                <th className="p-3 text-center font-bold text-secondary">
                   Items
                 </th>
-                <th className="p-3 text-right font-bold text-secondary">
+                <th className="p-3 text-center font-bold text-secondary">
                   Total
                 </th>
-                <th className="p-3 font-bold text-secondary">Payment</th>
-                <th className="p-3 font-bold text-secondary">Status</th>
-                <th className="p-3 text-right font-bold text-secondary">
+                <th className="p-3 text-center font-bold text-secondary">
+                  Savings
+                </th>
+                <th className="p-3 text-center font-bold text-secondary">
+                  Payment
+                </th>
+                <th className="p-3 text-center font-bold text-secondary">
+                  Status
+                </th>
+                <th className="p-3 text-center font-bold text-secondary">
                   <span className="sr-only">Actions</span>
                 </th>
               </tr>
@@ -268,14 +277,14 @@ export function OrdersBoard() {
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, index) => (
                   <tr key={index} className="border-b border-border">
-                    <td colSpan={8} className="p-3">
+                    <td colSpan={9} className="p-3">
                       <div className="h-6 animate-pulse rounded bg-muted" />
                     </td>
                   </tr>
                 ))
               ) : orders.length === 0 ? (
                 <tr>
-                  <td colSpan={8}>
+                  <td colSpan={9}>
                     <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
                       <span className="flex size-12 items-center justify-center rounded-full bg-primary/10">
                         <Package className="size-5 text-primary" />
@@ -306,15 +315,36 @@ export function OrdersBoard() {
                     <td className="p-3 whitespace-nowrap text-muted-foreground">
                       {formatWhen(order.created_at)}
                     </td>
-                    <td className="p-3 text-right text-secondary tabular-nums">
+                    <td className="p-3 text-center text-secondary tabular-nums">
                       {order.item_count}
                     </td>
-                    <td className="p-3 text-right font-medium text-secondary tabular-nums">
+                    <td className="p-3 text-center font-medium text-secondary tabular-nums">
                       {formatPrice(order.total)}
                     </td>
-                    <td className="p-3">
+                    {/* At a glance: whether anything came off, and via what. */}
+                    <td className="p-3 text-center whitespace-nowrap">
+                      {order.coupon_code || Number(order.offer_savings) > 0 ? (
+                        <span className="flex flex-col items-center gap-0.5">
+                          {order.coupon_code ? (
+                            <span className="font-mono text-xs font-bold tracking-wider text-primary">
+                              {order.coupon_code} −{formatPrice(order.discount)}
+                            </span>
+                          ) : null}
+                          {Number(order.offer_savings) > 0 ? (
+                            <span className="text-xs text-muted-foreground">
+                              Offers −{formatPrice(order.offer_savings)}
+                            </span>
+                          ) : null}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </td>
+                    <td className="p-3 text-center">
                       <PaymentStatusBadge status={order.payment_status} />
                     </td>
+                    {/* The select stays its own width and is centred as a
+                        block — text-center would only move its label. */}
                     <td className="p-3">
                       {/* Editable in place: moving a parcel along is the job
                           this screen exists for, and it should not need a
@@ -326,6 +356,7 @@ export function OrdersBoard() {
                         }
                         aria-label={`Status for ${order.order_number}`}
                         className="h-8 pr-8 pl-2 text-xs"
+                        wrapperClassName="mx-auto w-36"
                       >
                         {ORDER_STATUSES.map((option) => (
                           <option key={option.value} value={option.value}>
@@ -334,15 +365,34 @@ export function OrdersBoard() {
                         ))}
                       </NativeSelect>
                     </td>
-                    <td className="p-3 text-right">
-                      <button
-                        type="button"
-                        onClick={() => setOpenId(order.id)}
-                        aria-label={`View ${order.order_number}`}
-                        className="cursor-pointer p-2 text-muted-foreground transition-colors hover:text-primary"
-                      >
-                        <Eye className="size-4" />
-                      </button>
+                    <td className="p-3 text-center">
+                      <span className="inline-flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => void printInvoice(order)}
+                          disabled={
+                            receiptId === order.id ||
+                            order.payment_status !== "paid"
+                          }
+                          aria-label={`Print invoice for ${order.order_number}`}
+                          title={
+                            order.payment_status === "paid"
+                              ? "Print invoice"
+                              : "No invoice until the payment is confirmed"
+                          }
+                          className="cursor-pointer p-2 text-muted-foreground transition-colors hover:text-primary disabled:cursor-not-allowed disabled:opacity-30"
+                        >
+                          <Printer className="size-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setOpenId(order.id)}
+                          aria-label={`View ${order.order_number}`}
+                          className="cursor-pointer p-2 text-muted-foreground transition-colors hover:text-primary"
+                        >
+                          <Eye className="size-4" />
+                        </button>
+                      </span>
                     </td>
                   </tr>
                 ))

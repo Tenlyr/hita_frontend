@@ -37,7 +37,7 @@ export function useCheckout({
   const [isPaying, setIsPaying] = React.useState(false);
 
   const pay = React.useCallback(
-    async (addressId: number) => {
+    async (addressId: number, couponCode = "") => {
       setIsPaying(true);
 
       const ready = await loadRazorpay();
@@ -51,7 +51,7 @@ export function useCheckout({
 
       let created;
       try {
-        created = await orderService.create(addressId);
+        created = await orderService.create(addressId, couponCode);
       } catch (error) {
         setIsPaying(false);
         toast.error(getApiErrorMessage(error, "Could not start the payment."));

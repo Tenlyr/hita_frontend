@@ -65,11 +65,13 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  /* Brand ramp, deep brown through gold to sand — the greyscale defaults had
+     nothing to do with the palette the rest of the console uses. */
+  --chart-1: #58260c;
+  --chart-2: #8b5e3c;
+  --chart-3: #bb976d;
+  --chart-4: #d8c3ab;
+  --chart-5: #172430;
   --radius: 0.625rem;
   --sidebar: #58260c;
   --sidebar-foreground: #ffffff;

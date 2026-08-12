@@ -29,7 +29,6 @@ function toVariantPayload(variant: ProductVariantDraft): ProductVariantPayload {
     width_in_cm: numeric(variant.width_in_cm),
     height_in_cm: numeric(variant.height_in_cm),
     diameter_in_cm: numeric(variant.diameter_in_cm),
-    offer: text(variant.offer),
   };
 }
 
@@ -76,7 +75,6 @@ export function toProductDraft(product: Product): ProductDraft {
       width_in_cm: variant.width_in_cm ?? "",
       height_in_cm: variant.height_in_cm ?? "",
       diameter_in_cm: variant.diameter_in_cm ?? "",
-      offer: variant.offer ?? "",
     })),
   };
 }

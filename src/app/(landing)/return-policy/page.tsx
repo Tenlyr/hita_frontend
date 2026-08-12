@@ -1,3 +1,6 @@
+import type { Metadata } from "next";
+
+import { pageMetadata } from "@/lib/metadata";
 import { PageBanner } from "@/components/layout/page-banner";
 import { PolicyDocument } from "@/components/legal/policy-document";
 import { APP_ROUTES } from "@/constants/routes";
@@ -8,11 +11,12 @@ import {
   RETURN_RULE_TITLE,
 } from "@/constants/shipping";
 
-export const metadata = {
-  title: "Return Policy — Hitadecor",
+export const metadata: Metadata = pageMetadata({
+  title: "Return Policy",
   description:
-    "When a return is accepted, how refunds are processed, and which items are not returnable.",
-};
+    "When a return is accepted, how refunds are processed, and which Hitadecor items are not returnable.",
+  path: "/return-policy",
+});
 
 export default function ReturnPolicyPage() {
   return (

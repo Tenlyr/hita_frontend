@@ -14,7 +14,6 @@ export interface ProductVariantDraft {
   width_in_cm: string;
   height_in_cm: string;
   diameter_in_cm: string;
-  offer: string;
 }
 
 export interface ProductDraft {
@@ -65,7 +64,6 @@ export interface ProductVariantPayload {
   width_in_cm: number | null;
   height_in_cm: number | null;
   diameter_in_cm: number | null;
-  offer: string | null;
 }
 
 export interface ProductCreatePayload {

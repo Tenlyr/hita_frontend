@@ -7,6 +7,9 @@ export interface CartLine {
   image: string | null;
   size: string | null;
   offer: string | null;
+  /** Set only when an offer moved the price, so the UI knows when to strike
+      the old one through. */
+  original_price: string | null;
   /** Decimal string, straight from the server. Never do maths on this. */
   price: string;
   quantity: number;
