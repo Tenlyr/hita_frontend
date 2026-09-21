@@ -131,8 +131,9 @@ export function MessageDetail({
             Message
           </p>
           {/* `whitespace-pre-wrap`: the sender's own line breaks are the only
-              formatting we have, so they are worth keeping. */}
-          <p className="mt-2 leading-relaxed whitespace-pre-wrap text-secondary">
+              formatting we have, so they are worth keeping. `wrap-anywhere`
+              so a long pasted URL wraps instead of widening the pane. */}
+          <p className="mt-2 leading-relaxed whitespace-pre-wrap wrap-anywhere text-secondary">
             {message.message}
           </p>
         </div>
@@ -159,7 +160,7 @@ export function MessageDetail({
                       {formatReceived(reply.created_at)}
                     </p>
                   </div>
-                  <p className="mt-2 text-sm leading-relaxed whitespace-pre-wrap text-secondary">
+                  <p className="mt-2 text-sm leading-relaxed whitespace-pre-wrap wrap-anywhere text-secondary">
                     {reply.body}
                   </p>
                 </li>

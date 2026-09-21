@@ -88,12 +88,12 @@ export function ReplyDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="min-w-0 space-y-4">
           <div className="space-y-1.5">
             <Label className="text-secondary">To</Label>
             {/* Fixed on purpose: a reply goes to whoever wrote in, and a
                 typo here would send it into the void. */}
-            <p className="border border-border bg-muted px-3 py-2.5 text-sm text-secondary">
+            <p className="border border-border bg-muted px-3 py-2.5 text-sm wrap-anywhere text-secondary">
               {message.email}
             </p>
           </div>
@@ -143,7 +143,11 @@ export function ReplyDialog({
             <summary className="cursor-pointer px-3 py-2 text-xs font-bold text-muted-foreground uppercase">
               Their message
             </summary>
-            <p className="max-h-40 overflow-y-auto px-3 pb-3 text-sm leading-relaxed whitespace-pre-wrap text-secondary">
+            {/* `wrap-anywhere`, not `break-words`: only `anywhere` lowers the
+                text's minimum width, and the dialog is a grid that otherwise
+                widens to fit the longest pasted URL — pushing every field
+                past the panel edge. */}
+            <p className="max-h-40 overflow-y-auto px-3 pb-3 text-sm leading-relaxed whitespace-pre-wrap wrap-anywhere text-secondary">
               {message.message}
             </p>
           </details>
