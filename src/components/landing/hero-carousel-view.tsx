@@ -46,8 +46,9 @@ export function HeroCarouselView({ slides }: { slides: CarouselSlide[] }) {
         Boolean(node) && node !== incoming && node !== outgoing,
     );
     // Anything not part of this transition is parked, so a fast click that
-    // interrupts a tween cannot strand a slide mid-zoom.
-    gsap.set(rest, { autoAlpha: 0, scale: 1 });
+    // interrupts a tween cannot strand a slide mid-zoom. With a single slide
+    // there is nothing to park, and GSAP warns when handed an empty list.
+    if (rest.length > 0) gsap.set(rest, { autoAlpha: 0, scale: 1 });
 
     const reduced = window.matchMedia(
       "(prefers-reduced-motion: reduce)",

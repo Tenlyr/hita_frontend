@@ -187,7 +187,7 @@ export function AboutIntro() {
               alt=""
               width={55}
               height={44}
-              className={`${REVEAL_ITEM} h-10 h-12 sm:h-16`}
+              className={`${REVEAL_ITEM} h-12 w-auto sm:h-16`}
             />
 
             <h2

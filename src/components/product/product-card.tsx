@@ -108,7 +108,9 @@ export function ProductCard({
       <div className="relative aspect-square overflow-hidden bg-muted">
         <Link
           href={href ?? `/products/${product.id}`}
-          className="block size-full"
+          // `relative`: the image below uses `fill`, which positions itself
+          // against its parent — a static parent makes Next.js warn.
+          className="relative block size-full"
         >
           {image ? (
             <Image
